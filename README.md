@@ -7,6 +7,7 @@ A full-screen, Android-style camera app that performs real-time object detection
 - Captures a live webcam stream in the browser
 - Detects common objects (people, cars, pets, etc.) in real time
 - Draws bounding boxes and confidence scores around detected objects
+- Records annotated video clips (with bounding boxes burned in) via the shutter button and exports them — recorded clips appear in a gallery, tap to download
 - Uses WebGPU for accelerated inference (falls back to WebGL)
 - Adjustable confidence threshold via slider
 - Runs entirely client-side with no server required
