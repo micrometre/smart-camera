@@ -10,8 +10,203 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
-    <!-- Import the webpage's stylesheet -->
-    <link rel="stylesheet" href="src/style.css">
+    <style>
+:root {
+  --md-sys-color-primary: #6750A4;
+  --md-sys-color-on-primary: #FFFFFF;
+  --md-sys-color-surface: #FEF7FF;
+  --md-sys-color-on-surface: #1D1B20;
+  --md-sys-color-surface-container-low: #F7F2FA;
+  --md-sys-color-outline: #79747E;
+  --md-sys-color-secondary-container: #E8DEF8;
+  --md-sys-color-on-secondary-container: #1D192B;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #000;
+  color: #fff;
+  line-height: 1.5;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* Full-screen portrait camera surface */
+.camera-app {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background-color: #000;
+}
+
+.camView {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Video fills the screen like the native camera viewfinder */
+video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-color: #000;
+  display: block;
+}
+
+/* Top translucent status bar */
+.top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px 16px;
+  display: flex;
+  justify-content: center;
+  z-index: 10;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0));
+  pointer-events: none;
+}
+
+.status-pill {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background-color: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fff;
+}
+
+/* Loading overlay */
+.loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 20;
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.loader p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  animation: spin 800ms linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Hide loader once the model is ready */
+.camera-app:not(.loading) .loader {
+  display: none;
+}
+
+/* Bottom Android-style control bar */
+.controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 24px 24px calc(env(safe-area-inset-bottom, 0px) + 28px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+  background: linear-gradient(to top, rgba(0,0,0,0.6), rgba(0,0,0,0));
+}
+
+.control-slot {
+  width: 48px;
+  height: 48px;
+}
+
+/* Circular shutter button */
+.shutter {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: 4px solid rgba(255, 255, 255, 0.9);
+  background-color: #fff;
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.25);
+  transition: transform 120ms ease, background-color 200ms ease, box-shadow 200ms ease;
+}
+
+.shutter:active {
+  transform: scale(0.92);
+}
+
+/* Recording / active state turns the shutter accent-colored */
+.shutter.active {
+  background-color: var(--md-sys-color-primary);
+  box-shadow: 0 0 0 4px rgba(103, 80, 164, 0.35);
+}
+
+.shutter:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.removed {
+  display: none;
+}
+
+/* Detection Styles - Android Chip Style */
+.detection-label {
+  position: absolute;
+  padding: 4px 12px;
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  z-index: 2;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 8px;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.highlighter {
+  border: 2px solid var(--md-sys-color-primary);
+  border-radius: 8px;
+  z-index: 1;
+  position: absolute;
+  pointer-events: none;
+}
+    </style>
   </head>  
   <body>
     <main id="demos" class="camera-app loading">
@@ -43,7 +238,126 @@
     <!-- Load the coco-ssd model to use to recognize things in images -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
     
-    <!-- Import the page's JavaScript to do some stuff -->
-    <script src="src/script.js" defer></script>
+    <script>
+const video = document.getElementById('webcam');
+const liveView = document.getElementById('liveView');
+const demosSection = document.getElementById('demos');
+const enableWebcamButton = document.getElementById('webcamButton');
+const statusPill = document.getElementById('statusPill');
+
+// Store the resulting model in the global scope of our app.
+let model = undefined;
+let children = [];
+
+// Check if webcam access is supported.
+function getUserMediaSupported() {
+  return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+}
+
+// If webcam supported, add event listener to button for when user
+// wants to activate it.
+if (getUserMediaSupported()) {
+  enableWebcamButton.addEventListener('click', enableCam);
+} else {
+  statusPill.innerText = 'Webcam not supported';
+  console.warn('getUserMedia() is not supported by your browser');
+}
+
+// The shutter is disabled until the model finishes loading.
+enableWebcamButton.disabled = true;
+
+// Before we can use COCO-SSD class we must wait for it to finish loading.
+cocoSsd.load().then(function (loadedModel) {
+  model = loadedModel;
+  // Model ready: hide the loading overlay and enable the shutter.
+  demosSection.classList.remove('loading');
+  enableWebcamButton.disabled = false;
+  statusPill.innerText = 'Tap the shutter to start';
+});
+
+// Enable the live webcam view and start classification.
+function enableCam(event) {
+  // Only continue if the COCO-SSD has finished loading.
+  if (!model) {
+    return;
+  }
+  
+  // Switch the shutter into its active (detecting) state.
+  event.target.classList.add('active');
+  statusPill.innerText = 'Detecting\u2026';
+
+  // getUsermedia parameters: prefer the rear camera in portrait.
+  const constraints = {
+    video: { facingMode: 'environment' }
+  };
+
+  // Activate the webcam stream.
+  navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
+    video.srcObject = stream;
+    video.addEventListener('loadeddata', predictWebcam);
+  }).catch(function (err) {
+    statusPill.innerText = 'Camera access denied';
+    event.target.classList.remove('active');
+    console.error(err);
+  });
+}
+
+function predictWebcam() {
+  // Now let's start classifying a frame in the stream.
+  model.detect(video).then(function (predictions) {
+    // Remove any highlighting we did previous frame.
+    for (let i = 0; i < children.length; i++) {
+      liveView.removeChild(children[i]);
+    }
+    children.splice(0);
+    
+    // Now lets loop through predictions and draw them to the live view if
+    // they have a high confidence score.
+    for (let n = 0; n < predictions.length; n++) {
+      // If we are over 66% sure we are sure we classified it right, draw it!
+      if (predictions[n].score > 0.66) {
+        const p = document.createElement('p');
+        p.setAttribute('class', 'detection-label');
+        p.innerText = predictions[n].class  + ' - ' 
+            + Math.round(parseFloat(predictions[n].score) * 100) 
+            + '%';
+        
+        // The video uses object-fit: cover, so the source frame is scaled
+        // uniformly and centre-cropped. Map model coordinates accordingly.
+        const containerWidth = liveView.clientWidth;
+        const containerHeight = liveView.clientHeight;
+        const sourceWidth = video.videoWidth || 640;
+        const sourceHeight = video.videoHeight || 480;
+        const scale = Math.max(containerWidth / sourceWidth, containerHeight / sourceHeight);
+        const offsetX = (containerWidth - sourceWidth * scale) / 2;
+        const offsetY = (containerHeight - sourceHeight * scale) / 2;
+
+        const left = predictions[n].bbox[0] * scale + offsetX;
+        const top = predictions[n].bbox[1] * scale + offsetY;
+        const width = predictions[n].bbox[2] * scale;
+        const height = predictions[n].bbox[3] * scale;
+
+        p.style.left = left + 'px';
+        p.style.top = (top - 24) + 'px';
+
+        const highlighter = document.createElement('div');
+        highlighter.setAttribute('class', 'highlighter');
+        highlighter.style.left = left + 'px';
+        highlighter.style.top = top + 'px';
+        highlighter.style.width = width + 'px';
+        highlighter.style.height = height + 'px';
+
+        liveView.appendChild(highlighter);
+        liveView.appendChild(p);
+        children.push(highlighter);
+        children.push(p);
+      }
+    }
+    
+    // Call this function again to keep predicting when the browser is ready.
+    window.requestAnimationFrame(predictWebcam);
+  });
+}
+    </script>
   </body>
 </html>
