@@ -725,9 +725,22 @@
       }
     }
 
-    // ── Draw the current video frame + detections onto the canvas ────
+    // ── Draw only the detected regions (black background) onto the canvas ────
     function drawAnnotatedFrame(detections, srcW, srcH) {
-      captureCtx.drawImage(video, 0, 0, srcW, srcH);
+      // Black out the whole frame, then copy just the detected object regions.
+      captureCtx.fillStyle = '#000';
+      captureCtx.fillRect(0, 0, srcW, srcH);
+
+      for (const pred of detections) {
+        let [x, y, w, h] = pred.bbox;
+        // Clamp the source rectangle to the video bounds.
+        x = Math.max(0, x);
+        y = Math.max(0, y);
+        w = Math.min(w, srcW - x);
+        h = Math.min(h, srcH - y);
+        if (w <= 0 || h <= 0) continue;
+        captureCtx.drawImage(video, x, y, w, h, x, y, w, h);
+      }
 
       captureCtx.lineWidth = Math.max(2, Math.round(srcW / 320));
       captureCtx.strokeStyle = '#6750A4';
