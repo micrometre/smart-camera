@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Smart Camera - Object Detection</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- Import Roboto Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Import the webpage's stylesheet -->
+    <link rel="stylesheet" href="src/style.css">
+  </head>  
+  <body>
+    <main id="demos" class="camera-app loading">
+      <div id="liveView" class="camView">
+        <video id="webcam" autoplay muted playsinline></video>
+
+        <!-- Top translucent status bar -->
+        <div class="top-bar">
+          <span class="status-pill" id="statusPill">Loading model&hellip;</span>
+        </div>
+
+        <!-- Loading spinner shown until model is ready -->
+        <div class="loader" id="loader">
+          <div class="spinner"></div>
+          <p>Preparing camera&hellip;</p>
+        </div>
+
+        <!-- Bottom Android-style control bar -->
+        <div class="controls">
+          <div class="control-slot"></div>
+          <button id="webcamButton" class="shutter" aria-label="Enable webcam"></button>
+          <div class="control-slot"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Import TensorFlow.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js" type="text/javascript"></script>
+    <!-- Load the coco-ssd model to use to recognize things in images -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    
+    <!-- Import the page's JavaScript to do some stuff -->
+    <script src="src/script.js" defer></script>
+  </body>
+</html>
