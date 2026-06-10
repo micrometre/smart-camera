@@ -1,768 +1,944 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>Smart Camera - Object Detection</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
-    <style>
-:root {
-  --md-sys-color-primary: #6750A4;
-  --md-sys-color-on-primary: #FFFFFF;
-  --md-sys-color-surface: #FEF7FF;
-  --md-sys-color-on-surface: #1D1B20;
-  --md-sys-color-surface-container-low: #F7F2FA;
-  --md-sys-color-outline: #79747E;
-  --md-sys-color-secondary-container: #E8DEF8;
-  --md-sys-color-on-secondary-container: #1D192B;
-}
+<head>
+  <title>Smart Camera - Object Detection</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
 
-* { box-sizing: border-box; }
-html, body { height: 100%; }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
-body {
-  font-family: 'Roboto', sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #000;
-  color: #fff;
-  line-height: 1.5;
-  overflow: hidden;
-  overscroll-behavior: none;
-}
+  <style>
+    :root {
+      --md-sys-color-primary: #6750A4;
+      --md-sys-color-on-primary: #FFFFFF;
+      --md-sys-color-surface: #FEF7FF;
+      --md-sys-color-on-surface: #1D1B20;
+      --md-sys-color-surface-container-low: #F7F2FA;
+      --md-sys-color-outline: #79747E;
+      --md-sys-color-secondary-container: #E8DEF8;
+      --md-sys-color-on-secondary-container: #1D192B;
+    }
 
-.camera-app {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  background-color: #000;
-}
+    * {
+      box-sizing: border-box;
+    }
 
-.camView {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
+    html,
+    body {
+      height: 100%;
+    }
 
-video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  background-color: #000;
-  display: block;
-}
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      color: #fff;
+      line-height: 1.5;
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
 
-/* Top bar */
-.top-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  padding: calc(env(safe-area-inset-top, 0px) + 12px) 16px 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  z-index: 10;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0));
-  pointer-events: none;
-}
+    .camera-app {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      background-color: #000;
+    }
 
-.status-pill {
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.2px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  background-color: rgba(0,0,0,0.45);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  color: #fff;
-  pointer-events: none;
-}
+    .camView {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
 
-.backend-badge {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background-color: rgba(103,80,164,0.7);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  color: #fff;
-  display: none;
-}
+    video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background-color: #000;
+      display: block;
+    }
 
-.backend-badge.webgpu {
-  background-color: rgba(0, 180, 120, 0.75);
-}
+    /* Top bar */
+    .top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: calc(env(safe-area-inset-top, 0px) + 12px) 16px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      z-index: 10;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0));
+      pointer-events: none;
+    }
 
-.backend-badge.visible {
-  display: inline-block;
-}
+    .status-pill {
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.2px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background-color: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: #fff;
+      pointer-events: none;
+    }
 
-/* Confidence slider row */
-.threshold-row {
-  position: absolute;
-  bottom: 120px;
-  left: 0;
-  right: 0;
-  padding: 0 32px;
-  display: none;
-  align-items: center;
-  gap: 12px;
-  z-index: 10;
-  pointer-events: all;
-}
+    .backend-badge {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background-color: rgba(103, 80, 164, 0.7);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: #fff;
+      display: none;
+    }
 
-.threshold-row.visible {
-  display: flex;
-}
+    .backend-badge.webgpu {
+      background-color: rgba(0, 180, 120, 0.75);
+    }
 
-.threshold-row label {
-  font-size: 12px;
-  font-weight: 500;
-  color: rgba(255,255,255,0.85);
-  white-space: nowrap;
-}
+    .backend-badge.visible {
+      display: inline-block;
+    }
 
-.threshold-row input[type=range] {
-  flex: 1;
-  accent-color: var(--md-sys-color-primary);
-  cursor: pointer;
-}
+    /* Confidence slider row */
+    .threshold-row {
+      position: absolute;
+      bottom: 120px;
+      left: 0;
+      right: 0;
+      padding: 0 32px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      z-index: 10;
+      pointer-events: all;
+    }
 
-/* Loading overlay */
-.loader {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  z-index: 20;
-  color: #fff;
-  background-color: rgba(0,0,0,0.6);
-}
+    .threshold-row.visible {
+      display: flex;
+    }
 
-.loader p { margin: 0; font-size: 14px; opacity: 0.85; }
+    .threshold-row label {
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.85);
+      white-space: nowrap;
+    }
 
-.spinner {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 3px solid rgba(255,255,255,0.25);
-  border-top-color: #fff;
-  animation: spin 800ms linear infinite;
-}
+    .threshold-row input[type=range] {
+      flex: 1;
+      accent-color: var(--md-sys-color-primary);
+      cursor: pointer;
+    }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+    /* Loading overlay */
+    .loader {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 20;
+      color: #fff;
+      background-color: rgba(0, 0, 0, 0.6);
+    }
 
-.camera-app:not(.loading) .loader { display: none; }
+    .loader p {
+      margin: 0;
+      font-size: 14px;
+      opacity: 0.85;
+    }
 
-/* Controls */
-.controls {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 24px 24px calc(env(safe-area-inset-bottom, 0px) + 28px);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  z-index: 10;
-  background: linear-gradient(to top, rgba(0,0,0,0.6), rgba(0,0,0,0));
-}
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.25);
+      border-top-color: #fff;
+      animation: spin 800ms linear infinite;
+    }
 
-.control-slot { width: 48px; height: 48px; }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
 
-.shutter {
-  width: 76px;
-  height: 76px;
-  border-radius: 50%;
-  border: 4px solid rgba(255,255,255,0.9);
-  background-color: #fff;
-  cursor: pointer;
-  padding: 0;
-  box-shadow: 0 0 0 4px rgba(255,255,255,0.25);
-  transition: transform 120ms ease, background-color 200ms ease, box-shadow 200ms ease;
-}
+    .camera-app:not(.loading) .loader {
+      display: none;
+    }
 
-.shutter:active { transform: scale(0.92); }
+    /* Controls */
+    .controls {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 24px 24px calc(env(safe-area-inset-bottom, 0px) + 28px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0));
+    }
 
-.shutter.active {
-  background-color: var(--md-sys-color-primary);
-  box-shadow: 0 0 0 4px rgba(103,80,164,0.35);
-}
+    .control-slot {
+      width: 48px;
+      height: 48px;
+    }
 
-/* Recording state: red dot that morphs into a stop square */
-.shutter.recording {
-  background-color: #e53935;
-  border-color: rgba(255,255,255,0.9);
-  box-shadow: 0 0 0 4px rgba(229,57,53,0.35);
-  position: relative;
-}
+    /* Pause / resume icon button (shown only while recording) */
+    .icon-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      background-color: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: transform 120ms ease;
+    }
 
-.shutter.recording::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
-  background-color: #fff;
-  transform: translate(-50%, -50%);
-}
+    .icon-btn[hidden] { display: none; }
+    .icon-btn:active { transform: scale(0.92); }
 
-.shutter:disabled { opacity: 0.5; cursor: default; }
+    /* Two bars = pause */
+    .icon-btn.pause::before,
+    .icon-btn.pause::after {
+      content: '';
+      width: 5px;
+      height: 16px;
+      border-radius: 2px;
+      background-color: #fff;
+    }
 
-/* Detection overlays */
-.detection-label {
-  position: absolute;
-  padding: 4px 12px;
-  background-color: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
-  z-index: 2;
-  font-size: 12px;
-  font-weight: 500;
-  border-radius: 8px;
-  white-space: nowrap;
-  pointer-events: none;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
+    /* Triangle = resume */
+    .icon-btn.play::before {
+      content: '';
+      margin-left: 3px;
+      border-style: solid;
+      border-width: 9px 0 9px 15px;
+      border-color: transparent transparent transparent #fff;
+    }
 
-.highlighter {
-  border: 2px solid var(--md-sys-color-primary);
-  border-radius: 8px;
-  z-index: 1;
-  position: absolute;
-  pointer-events: none;
-}
+    .shutter {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      border: 4px solid rgba(255, 255, 255, 0.9);
+      background-color: #fff;
+      cursor: pointer;
+      padding: 0;
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.25);
+      transition: transform 120ms ease, background-color 200ms ease, box-shadow 200ms ease;
+    }
 
-/* Recorded-clips gallery */
-.gallery {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  width: 88px;
-  padding: calc(env(safe-area-inset-top, 0px) + 64px) 8px 120px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  overflow-y: auto;
-  z-index: 11;
-  scrollbar-width: none;
-}
+    .shutter:active {
+      transform: scale(0.92);
+    }
 
-.gallery::-webkit-scrollbar { display: none; }
-.gallery:empty { display: none; }
+    .shutter.active {
+      background-color: var(--md-sys-color-primary);
+      box-shadow: 0 0 0 4px rgba(103, 80, 164, 0.35);
+    }
 
-.gallery .clip {
-  position: relative;
-  flex: 0 0 auto;
-  width: 72px;
-  height: 72px;
-  border-radius: 12px;
-  border: 2px solid rgba(255,255,255,0.85);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-  background: #222 center / cover no-repeat;
-  cursor: pointer;
-  transition: transform 120ms ease;
-  text-decoration: none;
-}
+    /* Recording state: red dot that morphs into a stop square */
+    .shutter.recording {
+      background-color: #e53935;
+      border-color: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 0 4px rgba(229, 57, 53, 0.35);
+      position: relative;
+    }
 
-.gallery .clip:active { transform: scale(0.94); }
+    .shutter.recording::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      background-color: #fff;
+      transform: translate(-50%, -50%);
+    }
 
-.gallery .clip .play-badge {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background-color: rgba(0,0,0,0.55);
-  transform: translate(-50%, -50%);
-}
+    .shutter:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
 
-.gallery .clip .play-badge::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 54%;
-  transform: translate(-50%, -50%);
-  border-style: solid;
-  border-width: 6px 0 6px 10px;
-  border-color: transparent transparent transparent #fff;
-}
+    /* Detection overlays */
+    .detection-label {
+      position: absolute;
+      padding: 4px 12px;
+      background-color: var(--md-sys-color-primary);
+      color: var(--md-sys-color-on-primary);
+      z-index: 2;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 8px;
+      white-space: nowrap;
+      pointer-events: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
 
-.gallery .clip .clip-label {
-  position: absolute;
-  left: 4px;
-  bottom: 4px;
-  right: 4px;
-  font-size: 9px;
-  font-weight: 600;
-  line-height: 1.2;
-  padding: 2px 4px;
-  border-radius: 6px;
-  background-color: rgba(0,0,0,0.55);
-  color: #fff;
-  text-align: center;
-  pointer-events: none;
-}
+    .highlighter {
+      border: 2px solid var(--md-sys-color-primary);
+      border-radius: 8px;
+      z-index: 1;
+      position: absolute;
+      pointer-events: none;
+    }
 
-/* Recording timer pill */
-.rec-timer {
-  display: none;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 6px 14px;
-  border-radius: 999px;
-  background-color: rgba(229,57,53,0.85);
-  color: #fff;
-}
+    /* Recorded-clips gallery */
+    .gallery {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      width: 88px;
+      padding: calc(env(safe-area-inset-top, 0px) + 64px) 8px 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      z-index: 11;
+      scrollbar-width: none;
+    }
 
-.rec-timer.visible { display: inline-flex; }
+    .gallery::-webkit-scrollbar {
+      display: none;
+    }
 
-.rec-timer .dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background-color: #fff;
-  animation: blink 1s steps(1) infinite;
-}
+    .gallery:empty {
+      display: none;
+    }
 
-@keyframes blink { 50% { opacity: 0; } }
+    .gallery .clip {
+      position: relative;
+      flex: 0 0 auto;
+      width: 72px;
+      height: 72px;
+      border-radius: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+      background: #222 center / cover no-repeat;
+      cursor: pointer;
+      transition: transform 120ms ease;
+      text-decoration: none;
+    }
 
-/* Flash feedback on record start/stop */
-.flash {
-  position: absolute;
-  inset: 0;
-  background-color: #fff;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 30;
-}
+    .gallery .clip:active {
+      transform: scale(0.94);
+    }
 
-.flash.fire { animation: flash 320ms ease-out; }
+    .gallery .clip .play-badge {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background-color: rgba(0, 0, 0, 0.55);
+      transform: translate(-50%, -50%);
+    }
 
-@keyframes flash {
-  0% { opacity: 0.85; }
-  100% { opacity: 0; }
-}
-    </style>
-  </head>
-  <body>
-    <main id="demos" class="camera-app loading">
-      <div id="liveView" class="camView">
-        <video id="webcam" autoplay muted playsinline></video>
+    .gallery .clip .play-badge::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 54%;
+      transform: translate(-50%, -50%);
+      border-style: solid;
+      border-width: 6px 0 6px 10px;
+      border-color: transparent transparent transparent #fff;
+    }
 
-        <div class="top-bar">
-          <span class="status-pill" id="statusPill">Loading model&hellip;</span>
-          <span class="backend-badge" id="backendBadge"></span>
-          <span class="rec-timer" id="recTimer"><span class="dot"></span><span id="recTime">0:00</span></span>
-        </div>
+    .gallery .clip .clip-label {
+      position: absolute;
+      left: 4px;
+      bottom: 4px;
+      right: 4px;
+      font-size: 9px;
+      font-weight: 600;
+      line-height: 1.2;
+      padding: 2px 4px;
+      border-radius: 6px;
+      background-color: rgba(0, 0, 0, 0.55);
+      color: #fff;
+      text-align: center;
+      pointer-events: none;
+    }
 
-        <div class="loader" id="loader">
-          <div class="spinner"></div>
-          <p id="loaderText">Initialising WebGPU&hellip;</p>
-        </div>
+    /* Recording timer pill */
+    .rec-timer {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background-color: rgba(229, 57, 53, 0.85);
+      color: #fff;
+    }
 
-        <!-- Confidence threshold slider (shown once detecting) -->
-        <div class="threshold-row" id="thresholdRow">
-          <label for="thresholdSlider">Min confidence: <span id="thresholdVal">66%</span></label>
-          <input type="range" id="thresholdSlider" min="10" max="95" value="66" step="1">
-        </div>
+    .rec-timer.visible {
+      display: inline-flex;
+    }
 
-        <div class="gallery" id="gallery"></div>
+    .rec-timer .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background-color: #fff;
+      animation: blink 1s steps(1) infinite;
+    }
 
-        <div class="flash" id="flash"></div>
+    /* Steady, dimmed dot while paused */
+    .rec-timer.paused .dot {
+      animation: none;
+      opacity: 0.4;
+    }
 
-        <div class="controls">
-          <div class="control-slot"></div>
-          <button id="webcamButton" class="shutter" aria-label="Enable webcam"></button>
-          <div class="control-slot"></div>
-        </div>
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    /* Flash feedback on record start/stop */
+    .flash {
+      position: absolute;
+      inset: 0;
+      background-color: #fff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    .flash.fire {
+      animation: flash 320ms ease-out;
+    }
+
+    @keyframes flash {
+      0% {
+        opacity: 0.85;
+      }
+
+      100% {
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main id="demos" class="camera-app loading">
+    <div id="liveView" class="camView">
+      <video id="webcam" autoplay muted playsinline></video>
+
+      <div class="top-bar">
+        <span class="status-pill" id="statusPill">Loading model&hellip;</span>
+        <span class="backend-badge" id="backendBadge"></span>
+        <span class="rec-timer" id="recTimer"><span class="dot"></span><span id="recTime">0:00</span></span>
       </div>
-    </main>
 
-    <!-- Off-screen canvas: annotated frames are drawn here and recorded via captureStream() -->
-    <canvas id="captureCanvas" hidden></canvas>
+      <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <p id="loaderText">Initialising WebGPU&hellip;</p>
+      </div>
 
-    <!-- TensorFlow.js core -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
-    <!-- WebGPU backend — must be loaded AFTER tfjs core -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgpu/dist/tf-backend-webgpu.min.js"></script>
-    <!-- COCO-SSD model -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+      <!-- Confidence threshold slider (shown once detecting) -->
+      <div class="threshold-row" id="thresholdRow">
+        <label for="thresholdSlider">Min confidence: <span id="thresholdVal">66%</span></label>
+        <input type="range" id="thresholdSlider" min="10" max="95" value="66" step="1">
+      </div>
 
-    <script>
-const video          = document.getElementById('webcam');
-const liveView       = document.getElementById('liveView');
-const demosSection   = document.getElementById('demos');
-const enableBtn      = document.getElementById('webcamButton');
-const statusPill     = document.getElementById('statusPill');
-const backendBadge   = document.getElementById('backendBadge');
-const loaderText     = document.getElementById('loaderText');
-const thresholdRow   = document.getElementById('thresholdRow');
-const thresholdSlider= document.getElementById('thresholdSlider');
-const thresholdVal   = document.getElementById('thresholdVal');
-const gallery        = document.getElementById('gallery');
-const flash          = document.getElementById('flash');
-const recTimer       = document.getElementById('recTimer');
-const recTime        = document.getElementById('recTime');
-const captureCanvas  = document.getElementById('captureCanvas');
-const captureCtx     = captureCanvas.getContext('2d');
+      <div class="gallery" id="gallery"></div>
 
-let model = undefined;
-let children = [];
-let minScore = 0.66;
+      <div class="flash" id="flash"></div>
 
-// ── Recording state ──────────────────────────────────────────────
-const RECORD_FPS = 10;        // playback speed for the detection-only video
-const MAX_CLIPS  = 20;        // cap stored clips to limit memory use
-let streaming    = false;     // webcam stream is live
-let isRecording  = false;
-let isExporting  = false;     // rendering the final video
-let recordedFrames = [];      // ImageBitmaps of detection events
-let mediaRecorder = null;
-let recordedChunks = [];
-let recStartTs   = 0;
-let recTimerId   = null;
+      <div class="controls">
+        <div class="control-slot">
+          <button id="pauseButton" class="icon-btn pause" aria-label="Pause recording" hidden></button>
+        </div>
+        <button id="webcamButton" class="shutter" aria-label="Enable webcam"></button>
+        <div class="control-slot"></div>
+      </div>
+    </div>
+  </main>
 
-// ── Confidence slider ────────────────────────────────────────────
-thresholdSlider.addEventListener('input', () => {
-  minScore = thresholdSlider.value / 100;
-  thresholdVal.textContent = thresholdSlider.value + '%';
-});
+  <!-- Off-screen canvas: annotated frames are drawn here and recorded via captureStream() -->
+  <canvas id="captureCanvas" hidden></canvas>
 
-// ── Backend initialisation ───────────────────────────────────────
-async function initBackend() {
-  // Try WebGPU first; fall back to WebGL if not available.
-  if (navigator.gpu) {
-    try {
-      await tf.setBackend('webgpu');
-      await tf.ready();
-      console.log('✅ WebGPU backend active');
-      return 'webgpu';
-    } catch (e) {
-      console.warn('WebGPU init failed, falling back to WebGL:', e);
-    }
-  }
-  await tf.setBackend('webgl');
-  await tf.ready();
-  console.log('ℹ️ WebGL backend active');
-  return 'webgl';
-}
+  <!-- TensorFlow.js core -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+  <!-- WebGPU backend — must be loaded AFTER tfjs core -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgpu/dist/tf-backend-webgpu.min.js"></script>
+  <!-- COCO-SSD model -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
 
-// ── Startup ──────────────────────────────────────────────────────
-enableBtn.disabled = true;
+  <script>
+    const video = document.getElementById('webcam');
+    const liveView = document.getElementById('liveView');
+    const demosSection = document.getElementById('demos');
+    const enableBtn = document.getElementById('webcamButton');
+    const statusPill = document.getElementById('statusPill');
+    const backendBadge = document.getElementById('backendBadge');
+    const loaderText = document.getElementById('loaderText');
+    const thresholdRow = document.getElementById('thresholdRow');
+    const thresholdSlider = document.getElementById('thresholdSlider');
+    const thresholdVal = document.getElementById('thresholdVal');
+    const gallery = document.getElementById('gallery');
+    const flash = document.getElementById('flash');
+    const recTimer = document.getElementById('recTimer');
+    const recTime = document.getElementById('recTime');
+    const pauseBtn = document.getElementById('pauseButton');
+    const captureCanvas = document.getElementById('captureCanvas');
+    const captureCtx = captureCanvas.getContext('2d');
 
-(async () => {
-  loaderText.textContent = 'Initialising GPU backend\u2026';
-  const backend = await initBackend();
+    let model = undefined;
+    let children = [];
+    let minScore = 0.66;
 
-  // Show backend badge
-  backendBadge.textContent = backend.toUpperCase();
-  backendBadge.classList.add('visible');
-  if (backend === 'webgpu') backendBadge.classList.add('webgpu');
+    // ── Recording state ──────────────────────────────────────────────
+    const RECORD_FPS = 10;        // playback speed for the detection-only video
+    const MAX_CLIPS = 20;        // cap stored clips to limit memory use
+    let streaming = false;     // webcam stream is live
+    let isRecording = false;
+    let isPaused = false;      // recording paused (frames not captured)
+    let isExporting = false;     // rendering the final video
+    let recordedFrames = [];      // ImageBitmaps of detection events
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let recStartTs = 0;
+    let recTimerId = null;
 
-  loaderText.textContent = 'Loading detection model\u2026';
-  model = await cocoSsd.load({ base: 'lite_mobilenet_v2' });
-
-  demosSection.classList.remove('loading');
-  enableBtn.disabled = false;
-  statusPill.textContent = 'Tap the shutter to start';
-})();
-
-// ── Webcam ───────────────────────────────────────────────────────
-if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
-  statusPill.textContent = 'Webcam not supported';
-}
-
-enableBtn.addEventListener('click', onShutter);
-
-// The shutter has three roles: start the camera, then start/stop recording.
-async function onShutter() {
-  if (!model || isExporting) return;
-  if (!streaming) { enableCam(); return; }
-  if (!isRecording) startRecording(); else await stopRecording();
-}
-
-function enableCam() {
-  enableBtn.classList.add('active');
-  statusPill.textContent = 'Starting camera\u2026';
-  thresholdRow.classList.add('visible');
-
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-    .then(stream => {
-      video.srcObject = stream;
-      video.addEventListener('loadeddata', () => {
-        streaming = true;
-        enableBtn.classList.remove('active');
-        statusPill.textContent = 'Tap to record';
-        predictWebcam();
-      }, { once: true });
-    })
-    .catch(err => {
-      statusPill.textContent = 'Camera access denied';
-      enableBtn.classList.remove('active');
-      thresholdRow.classList.remove('visible');
-      console.error(err);
+    // ── Confidence slider ────────────────────────────────────────────
+    thresholdSlider.addEventListener('input', () => {
+      minScore = thresholdSlider.value / 100;
+      thresholdVal.textContent = thresholdSlider.value + '%';
     });
-}
 
-// ── Detection loop ───────────────────────────────────────────────
-function predictWebcam() {
-  model.detect(video).then(predictions => {
-    // Clear previous overlays
-    for (let i = 0; i < children.length; i++) liveView.removeChild(children[i]);
-    children.splice(0);
-
-    const containerW = liveView.clientWidth;
-    const containerH = liveView.clientHeight;
-    const srcW = video.videoWidth  || 640;
-    const srcH = video.videoHeight || 480;
-    const scale   = Math.max(containerW / srcW, containerH / srcH);
-    const offsetX = (containerW - srcW * scale) / 2;
-    const offsetY = (containerH - srcH * scale) / 2;
-
-    // Keep only confident detections.
-    const detections = predictions.filter(p => p.score >= minScore);
-
-    for (const pred of detections) {
-      const left   = pred.bbox[0] * scale + offsetX;
-      const top    = pred.bbox[1] * scale + offsetY;
-      const width  = pred.bbox[2] * scale;
-      const height = pred.bbox[3] * scale;
-
-      const label = document.createElement('p');
-      label.className = 'detection-label';
-      label.textContent = `${pred.class} ${Math.round(pred.score * 100)}%`;
-      label.style.left = left + 'px';
-      label.style.top  = (top - 28) + 'px';
-
-      const box = document.createElement('div');
-      box.className = 'highlighter';
-      box.style.left   = left + 'px';
-      box.style.top    = top + 'px';
-      box.style.width  = width + 'px';
-      box.style.height = height + 'px';
-
-      liveView.appendChild(box);
-      liveView.appendChild(label);
-      children.push(box, label);
-    }
-
-    // While recording, capture and store the annotated frame only if objects are detected.
-    if (isRecording && detections.length > 0 && recordedFrames.length < 1000) {
-      drawAnnotatedFrame(detections, srcW, srcH);
-      createImageBitmap(captureCanvas).then(bitmap => {
-        recordedFrames.push(bitmap);
-        
-        // Brief flash on the first frame of a detection sequence
-        if (recordedFrames.length % 10 === 1) {
-          flash.classList.remove('fire');
-          void flash.offsetWidth;
-          flash.classList.add('fire');
+    // ── Backend initialisation ───────────────────────────────────────
+    async function initBackend() {
+      // Try WebGPU first; fall back to WebGL if not available.
+      if (navigator.gpu) {
+        try {
+          await tf.setBackend('webgpu');
+          await tf.ready();
+          console.log('✅ WebGPU backend active', tf.backend());
+          return 'webgpu';
+        } catch (e) {
+          console.warn('WebGPU init failed, falling back to WebGL:', e);
         }
-      });
+      }
+      await tf.setBackend('webgl');
+      await tf.ready();
+      console.log('ℹ️ WebGL backend active', tf.backend());
+      return 'webgl';
     }
 
-    window.requestAnimationFrame(predictWebcam);
-  });
-}
+    // ── Startup ──────────────────────────────────────────────────────
+    enableBtn.disabled = true;
 
-// ── Draw the current video frame + detections onto the canvas ────
-function drawAnnotatedFrame(detections, srcW, srcH) {
-  captureCtx.drawImage(video, 0, 0, srcW, srcH);
+    (async () => {
+      loaderText.textContent = 'Initialising GPU backend\u2026';
+      const backend = await initBackend();
 
-  captureCtx.lineWidth = Math.max(2, Math.round(srcW / 320));
-  captureCtx.strokeStyle = '#6750A4';
-  captureCtx.font = `${Math.max(14, Math.round(srcW / 36))}px Roboto, sans-serif`;
-  captureCtx.textBaseline = 'top';
+      // Show backend badge
+      backendBadge.textContent = backend.toUpperCase();
+      backendBadge.classList.add('visible');
+      if (backend === 'webgpu') backendBadge.classList.add('webgpu');
 
-  for (const pred of detections) {
-    const [x, y, w, h] = pred.bbox;
-    captureCtx.strokeRect(x, y, w, h);
+      loaderText.textContent = 'Loading detection model\u2026';
+      model = await cocoSsd.load({ base: 'lite_mobilenet_v2' });
 
-    const text = `${pred.class} ${Math.round(pred.score * 100)}%`;
-    const padX = 6;
-    const textW = captureCtx.measureText(text).width;
-    const labelH = Math.max(18, Math.round(srcW / 26));
-    const labelY = Math.max(0, y - labelH);
+      demosSection.classList.remove('loading');
+      enableBtn.disabled = false;
+      statusPill.textContent = 'Tap the shutter to start';
+    })();
 
-    captureCtx.fillStyle = '#6750A4';
-    captureCtx.fillRect(x, labelY, textW + padX * 2, labelH);
-    captureCtx.fillStyle = '#FFFFFF';
-    captureCtx.fillText(text, x + padX, labelY + 3);
-  }
-}
+    // ── Webcam ───────────────────────────────────────────────────────
+    if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
+      statusPill.textContent = 'Webcam not supported';
+    }
 
-// ── Recording: start / stop / export ─────────────────────────────
-function pickMimeType() {
-  const candidates = [
-    'video/mp4',
-    'video/webm;codecs=vp9',
-    'video/webm;codecs=vp8',
-    'video/webm'
-  ];
-  return candidates.find(t => window.MediaRecorder &&
-    MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
-}
+    enableBtn.addEventListener('click', onShutter);
 
-function startRecording() {
-  if (isExporting) return;
-  
-  const srcW = video.videoWidth  || 640;
-  const srcH = video.videoHeight || 480;
-  captureCanvas.width = srcW;
-  captureCanvas.height = srcH;
-  
-  recordedFrames = [];
-  isRecording = true;
-  recStartTs = performance.now();
-  enableBtn.classList.add('recording');
-  enableBtn.setAttribute('aria-label', 'Stop recording');
-  recTimer.classList.add('visible');
-  updateRecTimer();
-  recTimerId = setInterval(updateRecTimer, 250);
-  
-  statusPill.textContent = 'Capturing detections...';
-}
+    // The shutter has three roles: start the camera, then start/stop recording.
+    async function onShutter() {
+      if (!model || isExporting) return;
+      if (!streaming) { enableCam(); return; }
+      if (!isRecording) startRecording(); else await stopRecording();
+    }
 
-async function stopRecording() {
-  if (!isRecording) return;
-  isRecording = false;
-  clearInterval(recTimerId);
-  
-  enableBtn.classList.remove('recording');
-  enableBtn.setAttribute('aria-label', 'Start recording');
-  
-  if (recordedFrames.length === 0) {
-    statusPill.textContent = 'No detections captured';
-    recTimer.classList.remove('visible');
-    return;
-  }
+    function enableCam() {
+      enableBtn.classList.add('active');
+      statusPill.textContent = 'Starting camera\u2026';
+      thresholdRow.classList.add('visible');
 
-  await renderAndExport();
-}
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then(stream => {
+          video.srcObject = stream;
+          video.addEventListener('loadeddata', () => {
+            streaming = true;
+            enableBtn.classList.remove('active');
+            statusPill.textContent = 'Tap to record';
+            predictWebcam();
+          }, { once: true });
+        })
+        .catch(err => {
+          statusPill.textContent = 'Camera access denied';
+          enableBtn.classList.remove('active');
+          thresholdRow.classList.remove('visible');
+          console.error(err);
+        });
+    }
 
-async function renderAndExport() {
-  isExporting = true;
-  statusPill.textContent = 'Exporting MP4...';
-  enableBtn.disabled = true;
-  
-  const mimeType = pickMimeType();
-  const stream = captureCanvas.captureStream(RECORD_FPS);
-  
-  try {
-    mediaRecorder = mimeType
-      ? new MediaRecorder(stream, { mimeType })
-      : new MediaRecorder(stream);
-  } catch (e) {
-    statusPill.textContent = 'Export failed';
-    console.error(e);
-    isExporting = false;
-    enableBtn.disabled = false;
-    return;
-  }
+    // ── Async object detection ───────────────────────────────────────
+    // coco-ssd's detect() calls the synchronous tf.image.nonMaxSuppression()
+    // and dataSync(), which stall the UI thread on the WebGPU backend.
+    // This reimplements its post-processing with async equivalents
+    // (executeAsync + tensor.data() + nonMaxSuppressionAsync), reusing the
+    // library's own helper methods so the COCO class map stays in sync.
+    async function detectFrame(net, input, maxNumBoxes = 20) {
+      // Fall back to the built-in detect() if internals aren't accessible.
+      if (!net.model || typeof net.calculateMaxScores !== 'function' ||
+          typeof net.buildDetectedObjects !== 'function') {
+        return net.detect(input, maxNumBoxes);
+      }
 
-  recordedChunks = [];
-  mediaRecorder.ondataavailable = e => { if (e.data && e.data.size) recordedChunks.push(e.data); };
-  
-  const exportPromise = new Promise(resolve => {
-    mediaRecorder.onstop = () => {
-      exportRecording();
-      resolve();
-    };
-  });
+      const batched = tf.tidy(() => tf.browser.fromPixels(input).expandDims(0));
+      const height = batched.shape[1];
+      const width  = batched.shape[2];
 
-  mediaRecorder.start();
+      const result = await net.model.executeAsync(batched);
+      // result[0]: scores [1, N, numClasses], result[1]: boxes [1, N, 1, 4]
+      const scores = await result[0].data();
+      const boxes  = await result[1].data();
+      batched.dispose();
 
-  // Playback the captured frames to the canvas for the MediaRecorder
-  for (const frame of recordedFrames) {
-    captureCtx.drawImage(frame, 0, 0);
-    // Wait for the next frame slot
-    await new Promise(r => setTimeout(r, 1000 / RECORD_FPS));
-    frame.close(); // release memory
-  }
+      const [maxScores, classes] =
+          net.calculateMaxScores(scores, result[0].shape[1], result[0].shape[2]);
 
-  mediaRecorder.stop();
-  await exportPromise;
-  
-  recordedFrames = [];
-  isExporting = false;
-  enableBtn.disabled = false;
-  recTimer.classList.remove('visible');
-  statusPill.textContent = 'Tap to record';
-}
+      const boxes2 = tf.tensor2d(boxes, [result[1].shape[1], result[1].shape[3]]);
+      // Async NMS keeps the GPU->CPU readback off the main thread.
+      const indexTensor =
+          await tf.image.nonMaxSuppressionAsync(boxes2, maxScores, maxNumBoxes, 0.5, 0.5);
+      const indexes = await indexTensor.data();
 
-function updateRecTimer() {
-  const count = recordedFrames.length;
-  recTime.textContent = `${count} frame${count === 1 ? '' : 's'}`;
-}
+      boxes2.dispose();
+      indexTensor.dispose();
+      tf.dispose(result);
 
-function exportRecording() {
-  if (!recordedChunks.length) return;
+      return net.buildDetectedObjects(width, height, boxes, maxScores, indexes, classes);
+    }
 
-  const type = (mediaRecorder && mediaRecorder.mimeType) || 'video/webm';
-  const blob = new Blob(recordedChunks, { type });
-  const url  = URL.createObjectURL(blob);
-  const ext  = type.includes('mp4') ? 'mp4' : 'webm';
-  const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-  const poster = captureCanvas.toDataURL('image/jpeg', 0.6);
-  const dur = `${recordedFrames.length} f`;
+    // ── Detection loop ───────────────────────────────────────────────
+    async function predictWebcam() {
+      let predictions;
+      try {
+        predictions = await detectFrame(model, video, 20);
+      } catch (err) {
+        console.error('Detection failed:', err);
+        window.requestAnimationFrame(predictWebcam);
+        return;
+      }
+      {
+        // Clear previous overlays
+        for (let i = 0; i < children.length; i++) liveView.removeChild(children[i]);
+        children.splice(0);
 
-  addClipToGallery(url, `detection-${stamp}.${ext}`, poster, dur);
+        const containerW = liveView.clientWidth;
+        const containerH = liveView.clientHeight;
+        const srcW = video.videoWidth || 640;
+        const srcH = video.videoHeight || 480;
+        const scale = Math.max(containerW / srcW, containerH / srcH);
+        const offsetX = (containerW - srcW * scale) / 2;
+        const offsetY = (containerH - srcH * scale) / 2;
 
-  flash.classList.remove('fire');
-  void flash.offsetWidth; // restart animation
-  flash.classList.add('fire');
-}
+        // Keep only confident detections.
+        const detections = predictions.filter(p => p.score >= minScore);
 
-// ── Add a recorded clip to the gallery (newest first) ────────────
-function addClipToGallery(url, filename, poster, dur) {
-  const clip = document.createElement('a');
-  clip.className = 'clip';
-  clip.href = url;
-  clip.download = filename;
-  clip.title = 'Tap to download recording';
-  if (poster) clip.style.backgroundImage = `url(${poster})`;
+        for (const pred of detections) {
+          const left = pred.bbox[0] * scale + offsetX;
+          const top = pred.bbox[1] * scale + offsetY;
+          const width = pred.bbox[2] * scale;
+          const height = pred.bbox[3] * scale;
 
-  const badge = document.createElement('span');
-  badge.className = 'play-badge';
+          const label = document.createElement('p');
+          label.className = 'detection-label';
+          label.textContent = `${pred.class} ${Math.round(pred.score * 100)}%`;
+          label.style.left = left + 'px';
+          label.style.top = (top - 28) + 'px';
 
-  const label = document.createElement('span');
-  label.className = 'clip-label';
-  label.textContent = dur;
+          const box = document.createElement('div');
+          box.className = 'highlighter';
+          box.style.left = left + 'px';
+          box.style.top = top + 'px';
+          box.style.width = width + 'px';
+          box.style.height = height + 'px';
 
-  clip.appendChild(badge);
-  clip.appendChild(label);
-  gallery.prepend(clip);
+          liveView.appendChild(box);
+          liveView.appendChild(label);
+          children.push(box, label);
+        }
 
-  // Trim old clips and release their object URLs.
-  while (gallery.children.length > MAX_CLIPS) {
-    const old = gallery.lastChild;
-    if (old.href) URL.revokeObjectURL(old.href);
-    gallery.removeChild(old);
-  }
-}
-    </script>
-  </body>
+        // While recording, capture and store the annotated frame only if objects are detected.
+        if (isRecording && !isPaused && detections.length > 0 && recordedFrames.length < 1000) {
+          drawAnnotatedFrame(detections, srcW, srcH);
+          createImageBitmap(captureCanvas).then(bitmap => {
+            recordedFrames.push(bitmap);
+
+            // Brief flash on the first frame of a detection sequence
+            if (recordedFrames.length % 10 === 1) {
+              flash.classList.remove('fire');
+              void flash.offsetWidth;
+              flash.classList.add('fire');
+            }
+          });
+        }
+
+        window.requestAnimationFrame(predictWebcam);
+      }
+    }
+
+    // ── Draw the current video frame + detections onto the canvas ────
+    function drawAnnotatedFrame(detections, srcW, srcH) {
+      captureCtx.drawImage(video, 0, 0, srcW, srcH);
+
+      captureCtx.lineWidth = Math.max(2, Math.round(srcW / 320));
+      captureCtx.strokeStyle = '#6750A4';
+      captureCtx.font = `${Math.max(14, Math.round(srcW / 36))}px Roboto, sans-serif`;
+      captureCtx.textBaseline = 'top';
+
+      for (const pred of detections) {
+        const [x, y, w, h] = pred.bbox;
+        captureCtx.strokeRect(x, y, w, h);
+
+        const text = `${pred.class} ${Math.round(pred.score * 100)}%`;
+        const padX = 6;
+        const textW = captureCtx.measureText(text).width;
+        const labelH = Math.max(18, Math.round(srcW / 26));
+        const labelY = Math.max(0, y - labelH);
+
+        captureCtx.fillStyle = '#6750A4';
+        captureCtx.fillRect(x, labelY, textW + padX * 2, labelH);
+        captureCtx.fillStyle = '#FFFFFF';
+        captureCtx.fillText(text, x + padX, labelY + 3);
+      }
+    }
+
+    // ── Recording: start / stop / export ─────────────────────────────
+    function pickMimeType() {
+      const candidates = [
+        'video/mp4',
+        'video/webm;codecs=vp9',
+        'video/webm;codecs=vp8',
+        'video/webm'
+      ];
+      return candidates.find(t => window.MediaRecorder &&
+        MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
+    }
+
+    function startRecording() {
+      if (isExporting) return;
+
+      const srcW = video.videoWidth || 640;
+      const srcH = video.videoHeight || 480;
+      captureCanvas.width = srcW;
+      captureCanvas.height = srcH;
+
+      recordedFrames = [];
+      isRecording = true;
+      isPaused = false;
+      recStartTs = performance.now();
+      enableBtn.classList.add('recording');
+      enableBtn.setAttribute('aria-label', 'Stop recording');
+      recTimer.classList.add('visible');
+      recTimer.classList.remove('paused');
+      showPauseButton(true);
+      updateRecTimer();
+      recTimerId = setInterval(updateRecTimer, 250);
+
+      statusPill.textContent = 'Capturing detections...';
+    }
+
+    // ── Pause / resume capture ───────────────────────────────────────
+    pauseBtn.addEventListener('click', togglePause);
+
+    function togglePause() {
+      if (!isRecording) return;
+      isPaused = !isPaused;
+      recTimer.classList.toggle('paused', isPaused);
+      pauseBtn.classList.toggle('pause', !isPaused);
+      pauseBtn.classList.toggle('play', isPaused);
+      pauseBtn.setAttribute('aria-label', isPaused ? 'Resume recording' : 'Pause recording');
+      statusPill.textContent = isPaused ? 'Paused' : 'Capturing detections...';
+    }
+
+    function showPauseButton(show) {
+      pauseBtn.hidden = !show;
+      pauseBtn.classList.toggle('pause', show);
+      pauseBtn.classList.remove('play');
+      pauseBtn.setAttribute('aria-label', 'Pause recording');
+    }
+
+    async function stopRecording() {
+      if (!isRecording) return;
+      isRecording = false;
+      isPaused = false;
+      clearInterval(recTimerId);
+
+      enableBtn.classList.remove('recording');
+      enableBtn.setAttribute('aria-label', 'Start recording');
+      recTimer.classList.remove('paused');
+      showPauseButton(false);
+
+      if (recordedFrames.length === 0) {
+        statusPill.textContent = 'No detections captured';
+        recTimer.classList.remove('visible');
+        return;
+      }
+
+      await renderAndExport();
+    }
+
+    async function renderAndExport() {
+      isExporting = true;
+      statusPill.textContent = 'Exporting MP4...';
+      enableBtn.disabled = true;
+
+      const mimeType = pickMimeType();
+      const stream = captureCanvas.captureStream(RECORD_FPS);
+
+      try {
+        mediaRecorder = mimeType
+          ? new MediaRecorder(stream, { mimeType })
+          : new MediaRecorder(stream);
+      } catch (e) {
+        statusPill.textContent = 'Export failed';
+        console.error(e);
+        isExporting = false;
+        enableBtn.disabled = false;
+        return;
+      }
+
+      recordedChunks = [];
+      mediaRecorder.ondataavailable = e => { if (e.data && e.data.size) recordedChunks.push(e.data); };
+
+      const exportPromise = new Promise(resolve => {
+        mediaRecorder.onstop = () => {
+          exportRecording();
+          resolve();
+        };
+      });
+
+      mediaRecorder.start();
+
+      // Playback the captured frames to the canvas for the MediaRecorder
+      for (const frame of recordedFrames) {
+        captureCtx.drawImage(frame, 0, 0);
+        // Wait for the next frame slot
+        await new Promise(r => setTimeout(r, 1000 / RECORD_FPS));
+        frame.close(); // release memory
+      }
+
+      mediaRecorder.stop();
+      await exportPromise;
+
+      recordedFrames = [];
+      isExporting = false;
+      enableBtn.disabled = false;
+      recTimer.classList.remove('visible');
+      statusPill.textContent = 'Tap to record';
+    }
+
+    function updateRecTimer() {
+      const count = recordedFrames.length;
+      recTime.textContent = `${count} frame${count === 1 ? '' : 's'}`;
+    }
+
+    function exportRecording() {
+      if (!recordedChunks.length) return;
+
+      const type = (mediaRecorder && mediaRecorder.mimeType) || 'video/webm';
+      const blob = new Blob(recordedChunks, { type });
+      const url = URL.createObjectURL(blob);
+      const ext = type.includes('mp4') ? 'mp4' : 'webm';
+      // UK-format date & time: DD-MM-YYYY_HH-MM-SS
+      const now = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      const stamp = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()}` +
+        `_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+      const poster = captureCanvas.toDataURL('image/jpeg', 0.6);
+      const dur = `${recordedFrames.length} f`;
+
+      addClipToGallery(url, `${stamp}.${ext}`, poster, dur);
+
+      flash.classList.remove('fire');
+      void flash.offsetWidth; // restart animation
+      flash.classList.add('fire');
+    }
+
+    // ── Add a recorded clip to the gallery (newest first) ────────────
+    function addClipToGallery(url, filename, poster, dur) {
+      const clip = document.createElement('a');
+      clip.className = 'clip';
+      clip.href = url;
+      clip.download = filename;
+      clip.title = 'Tap to download recording';
+      if (poster) clip.style.backgroundImage = `url(${poster})`;
+
+      const badge = document.createElement('span');
+      badge.className = 'play-badge';
+
+      const label = document.createElement('span');
+      label.className = 'clip-label';
+      label.textContent = dur;
+
+      clip.appendChild(badge);
+      clip.appendChild(label);
+      gallery.prepend(clip);
+
+      // Trim old clips and release their object URLs.
+      while (gallery.children.length > MAX_CLIPS) {
+        const old = gallery.lastChild;
+        if (old.href) URL.revokeObjectURL(old.href);
+        gallery.removeChild(old);
+      }
+    }
+  </script>
+</body>
+
 </html>
