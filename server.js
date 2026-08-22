@@ -64,8 +64,10 @@ app.post('/api/detections', async (req, res) => {
     let imagePath = null;
     if (image) {
       try {
-        const timestampStr = timestamp || new Date().toISOString();
-        const filename = `detection_${Date.now()}.png`;
+        const dateObj = timestamp ? new Date(timestamp) : new Date();
+        const pad = n => String(n).padStart(2, '0');
+        const formattedDate = `${dateObj.getFullYear()}-${pad(dateObj.getMonth() + 1)}-${pad(dateObj.getDate())}_${pad(dateObj.getHours())}-${pad(dateObj.getMinutes())}-${pad(dateObj.getSeconds())}`;
+        const filename = `detection_${formattedDate}.png`;
         imagePath = path.join(IMAGES_DIR, filename);
         
         // Convert base64 to buffer and save
@@ -186,12 +188,59 @@ app.get('/api/stats', async (req, res) => {
 app.delete('/api/detections', async (req, res) => {
   try {
     console.log('🗑️  DELETE /api/detections request - clearing all detections');
+    const data = await fs.readFile(DATA_FILE, 'utf8');
+    const allDetections = JSON.parse(data);
+    
+    // Delete image files
+    for (const entry of allDetections) {
+      if (entry.imagePath) {
+        const imgPath = path.join(__dirname, 'public', entry.imagePath);
+        await fs.unlink(imgPath).catch(() => {});
+      }
+    }
+
     await fs.writeFile(DATA_FILE, JSON.stringify([]));
     console.log('✅ All detections cleared');
     res.json({ success: true });
   } catch (error) {
     console.error('❌ Error clearing detections:', error);
     res.status(500).json({ error: 'Failed to clear detections' });
+  }
+});
+
+// POST endpoint for bulk deletion of specific detections
+app.post('/api/detections/bulk-delete', async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids)) {
+      return res.status(400).json({ error: 'ids must be an array' });
+    }
+
+    console.log(`🗑️  POST /api/detections/bulk-delete - deleting ${ids.length} detections`);
+    
+    const data = await fs.readFile(DATA_FILE, 'utf8');
+    let allDetections = JSON.parse(data);
+    
+    // Find detections to delete
+    const toDelete = allDetections.filter(entry => ids.includes(entry.id));
+    
+    // Delete their image files
+    for (const entry of toDelete) {
+      if (entry.imagePath) {
+        const imgPath = path.join(__dirname, 'public', entry.imagePath);
+        await fs.unlink(imgPath).catch(() => {});
+      }
+    }
+    
+    // Filter out deleted detections
+    allDetections = allDetections.filter(entry => !ids.includes(entry.id));
+    
+    await fs.writeFile(DATA_FILE, JSON.stringify(allDetections, null, 2));
+    console.log(`✅ Deleted ${toDelete.length} detections`);
+    res.json({ success: true, deleted: toDelete.length });
+  } catch (error) {
+    console.error('❌ Error in bulk delete:', error);
+    res.status(500).json({ error: 'Failed to delete detections' });
   }
 });
 
@@ -204,6 +253,7 @@ initDataFile().then(() => {
     console.log(`   GET    /api/detections - Retrieve detection history`);
     console.log(`   GET    /api/stats      - Get detection statistics`);
     console.log(`   DELETE /api/detections - Clear all detections`);
+    console.log(`   POST   /api/detections/bulk-delete - Delete specific detections`);
   });
 }).catch(err => {
   console.error('❌ Failed to initialize data file:', err);

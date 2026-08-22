@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Smart Camera - Dashboard</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --md-sys-color-primary: #6750A4;
+      --md-sys-color-on-primary: #FFFFFF;
+      --md-sys-color-error: #B3261E;
+      --md-sys-color-on-error: #FFFFFF;
+      --bg-gradient-start: #1a1a2e;
+      --bg-gradient-end: #0f3460;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, var(--bg-gradient-start) 0%, #16213e 50%, var(--bg-gradient-end) 100%);
+      color: #fff;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 20px 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--md-sys-color-primary);
+      text-decoration: none;
+    }
+
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      margin-left: 30px;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover { color: var(--md-sys-color-primary); }
+
+    main {
+      flex: 1;
+      padding: 40px 0;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 16px 24px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 500;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--md-sys-color-primary);
+      color: var(--md-sys-color-on-primary);
+    }
+    .btn-primary:hover {
+      background: #7965b3;
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      background: var(--md-sys-color-error);
+      color: var(--md-sys-color-on-error);
+    }
+    .btn-danger:hover {
+      background: #c93b33;
+      transform: translateY(-1px);
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .stats {
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      border-color: rgba(103, 80, 164, 0.5);
+    }
+
+    .card-image-wrapper {
+      position: relative;
+      padding-top: 75%; /* 4:3 aspect ratio */
+      background: #000;
+      overflow: hidden;
+    }
+
+    .card img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    
+    .card:hover img {
+      transform: scale(1.05);
+    }
+
+    .card-content {
+      padding: 16px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .card-meta {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 16px;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      background: rgba(103, 80, 164, 0.2);
+      color: #d0bcf1;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      border: 1px solid rgba(103, 80, 164, 0.3);
+    }
+
+    /* Checkbox styles */
+    .checkbox-wrapper {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 10;
+      background: rgba(0,0,0,0.5);
+      border-radius: 4px;
+      padding: 4px;
+      backdrop-filter: blur(4px);
+    }
+
+    .card-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--md-sys-color-primary);
+    }
+
+    /* Card active state */
+    .card.selected {
+      border-color: var(--md-sys-color-primary);
+      box-shadow: 0 0 0 2px var(--md-sys-color-primary);
+    }
+
+    .delete-single {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 10;
+      background: rgba(179, 38, 30, 0.8);
+      color: white;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      opacity: 0;
+      transition: opacity 0.2s, background 0.2s;
+    }
+
+    .card:hover .delete-single {
+      opacity: 1;
+    }
+    .delete-single:hover {
+      background: rgba(179, 38, 30, 1);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 16px;
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+    }
+    
+    .empty-state h3 { margin-bottom: 8px; color: #fff; }
+    .empty-state p { color: rgba(255, 255, 255, 0.6); }
+
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container header-content">
+      <a href="landing.html" class="logo">🎥 Smart Camera</a>
+      <nav class="nav-links">
+        <a href="landing.html">Home</a>
+        <a href="index.html">Camera</a>
+        <a href="dashboard.html">Dashboard</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="toolbar">
+      <div class="stats">
+        <strong id="totalCount">0</strong> captures found
+      </div>
+      <div class="toolbar-actions">
+        <button id="selectAllBtn" class="btn btn-primary">Select All</button>
+        <button id="deleteSelectedBtn" class="btn btn-danger" disabled>
+          Delete Selected (<span id="selectedCount">0</span>)
+        </button>
+      </div>
+    </div>
+
+    <div id="gallery" class="grid">
+      <!-- Cards will be injected here -->
+    </div>
+    
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <h3>No detections yet</h3>
+      <p>Start the camera to capture some detections.</p>
+      <br>
+      <a href="index.html" class="btn btn-primary">Open Camera</a>
+    </div>
+  </main>
+
+  <script>
+    const gallery = document.getElementById('gallery');
+    const emptyState = document.getElementById('emptyState');
+    const totalCountEl = document.getElementById('totalCount');
+    const selectedCountEl = document.getElementById('selectedCount');
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+
+    let detections = [];
+    let selectedIds = new Set();
+    const API_URL = '/api/detections';
+
+    async function fetchDetections() {
+      try {
+        const response = await fetch(API_URL);
+        detections = await response.json();
+        renderGallery();
+      } catch (err) {
+        console.error('Failed to fetch detections', err);
+      }
+    }
+
+    function renderGallery() {
+      totalCountEl.textContent = detections.length;
+      gallery.innerHTML = '';
+      
+      if (detections.length === 0) {
+        emptyState.style.display = 'block';
+        return;
+      }
+      
+      emptyState.style.display = 'none';
+
+      detections.forEach(item => {
+        const hasImage = !!item.imagePath;
+        const imgUrl = hasImage ? item.imagePath : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23222"/><text x="50" y="50" fill="%23666" text-anchor="middle" dominant-baseline="middle">No Image</text></svg>';
+        
+        // Format date safely
+        let dateStr = 'Unknown date';
+        try {
+          dateStr = new Date(item.timestamp).toLocaleString();
+        } catch(e) {}
+
+        const tagsHtml = item.detections.map(d => 
+          `<span class="tag">${d.class} (${Math.round(d.score * 100)}%)</span>`
+        ).join('');
+
+        const card = document.createElement('div');
+        card.className = `card ${selectedIds.has(item.id) ? 'selected' : ''}`;
+        card.innerHTML = `
+          <div class="checkbox-wrapper">
+            <input type="checkbox" class="card-checkbox" data-id="${item.id}" ${selectedIds.has(item.id) ? 'checked' : ''}>
+          </div>
+          <button class="delete-single" data-id="${item.id}" title="Delete this image">✕</button>
+          <div class="card-image-wrapper">
+            <img src="${imgUrl}" alt="Detection" loading="lazy">
+          </div>
+          <div class="card-content">
+            <div class="card-title">Detection #${item.id}</div>
+            <div class="card-meta">${dateStr}</div>
+            <div class="tags">${tagsHtml}</div>
+          </div>
+        `;
+
+        // Checkbox event
+        const checkbox = card.querySelector('.card-checkbox');
+        checkbox.addEventListener('change', (e) => {
+          if (e.target.checked) {
+            selectedIds.add(item.id);
+            card.classList.add('selected');
+          } else {
+            selectedIds.delete(item.id);
+            card.classList.remove('selected');
+          }
+          updateActionState();
+        });
+
+        // Single delete event
+        const delBtn = card.querySelector('.delete-single');
+        delBtn.addEventListener('click', () => deleteIds([item.id]));
+
+        gallery.appendChild(card);
+      });
+      
+      updateActionState();
+    }
+
+    function updateActionState() {
+      selectedCountEl.textContent = selectedIds.size;
+      deleteSelectedBtn.disabled = selectedIds.size === 0;
+      
+      if (detections.length > 0 && selectedIds.size === detections.length) {
+        selectAllBtn.textContent = 'Deselect All';
+      } else {
+        selectAllBtn.textContent = 'Select All';
+      }
+    }
+
+    selectAllBtn.addEventListener('click', () => {
+      if (selectedIds.size === detections.length) {
+        // Deselect all
+        selectedIds.clear();
+      } else {
+        // Select all
+        detections.forEach(d => selectedIds.add(d.id));
+      }
+      renderGallery();
+    });
+
+    deleteSelectedBtn.addEventListener('click', () => {
+      if (selectedIds.size === 0) return;
+      if (confirm(`Are you sure you want to delete ${selectedIds.size} detection(s)?`)) {
+        deleteIds(Array.from(selectedIds));
+      }
+    });
+
+    async function deleteIds(ids) {
+      try {
+        const response = await fetch('/api/detections/bulk-delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids })
+        });
+        
+        if (response.ok) {
+          // Remove from local state
+          ids.forEach(id => selectedIds.delete(id));
+          detections = detections.filter(d => !ids.includes(d.id));
+          renderGallery();
+        } else {
+          alert('Failed to delete detections');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error occurred while deleting');
+      }
+    }
+
+    // Init
+    fetchDetections();
+  </script>
+</body>
+</html>

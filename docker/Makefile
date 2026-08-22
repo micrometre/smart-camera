@@ -1,21 +1,24 @@
-.PHONY: install clean 
+.PHONY: clean start stop restart logs build remove mkcert
+
 clean:
+	@echo "Cleaning up Docker resources..."
 	docker compose down -v || true
 	docker compose rm -f || true
-	docker volume ls -q | xargs -r docker volume rm -f || true
 	sudo find ./nginx/logs -mindepth 1 -maxdepth 1 ! -name '.gitkeep' -type f -exec rm -f {} + 2>/dev/null || true
+	rm -f ../public/images/*.png
+	echo "[]" > ../detections.json
+	@echo "Cleanup complete"
 
-create_htpasswd:
-	@echo "Creating htpasswd file..."
-	@htpasswd -c -B -b nginx/.htpasswd admin admin123
+mkcert:
+	@echo "Generating SSL certificates..."
+	mkdir -p nginx/certs
+	openssl req -x509 -newkey rsa:4096 -keyout nginx/certs/localhost-key.pem -out nginx/certs/localhost.pem -days 365 -nodes -subj "/CN=localhost"
+	@echo "SSL certificates generated successfully"
 
 start:
-	@echo "Starting services..."
-	@echo "Creating runtime directories with proper permissions..."
-	mkdir -p nginx/logs nginx/certs logs output data
-	chmod 775 logs output data
-	@[ -O nginx/logs ] && chmod 775 nginx/logs || true
-	@[ -O nginx/certs ] && chmod 775 nginx/certs || true
+	@echo "Starting Smart Camera services..."
+	@echo "Creating runtime directories..."
+	mkdir -p nginx/logs ../public/images
 	@echo "Checking SSL certificates..."
 	@if [ ! -f nginx/certs/localhost.pem ] || [ ! -f nginx/certs/localhost-key.pem ]; then \
 		echo "Generating SSL certificates..."; \
@@ -23,28 +26,34 @@ start:
 	else \
 		echo "SSL certificates already exist."; \
 	fi
-	@echo "Starting services (APP_UID/APP_GID align container user with these dirs)..."
-	APP_UID=$$(id -u) APP_GID=$$(id -g) docker compose up -d
-
-mkcert:
-	@echo "Removing old SSL certificates..."
-	@rm -f nginx/certs/localhost-key.pem nginx/certs/localhost.pem || true
-	@echo "Generating new SSL certificates..."
-	mkdir -p nginx/certs
-	mkcert -install
-	mkcert -key-file nginx/certs/localhost-key.pem -cert-file nginx/certs/localhost.pem localhost 127.0.0.1 ::1 nobel.local cbwanpr cbwanpr.local 
+	@echo "Building and starting containers..."
+	docker compose up -d --build
+	@echo "Services started!"
+	@echo "HTTP (redirects to HTTPS): http://localhost:8081"
+	@echo "HTTPS: https://localhost:8443"
+	@echo "Backend API: https://localhost:8443/api"
+	@echo "Images: https://localhost:8443/images"
 
 stop:
-	docker compose down 
-
-update:
+	@echo "Stopping services..."
 	docker compose down
-	docker compose pull
-	APP_UID=$$(id -u) APP_GID=$$(id -g) docker compose up -d --build
-	
-restart: 
+	@echo "Services stopped"
+
+restart:
+	@echo "Restarting services..."
 	docker compose restart
+	@echo "Services restarted"
+
+logs:
+	docker compose logs -f
+
+build:
+	@echo "Building containers..."
+	docker compose build --no-cache
+	@echo "Build complete"
 
 remove:
+	@echo "Removing all containers and volumes..."
 	docker compose down -v
 	docker compose rm -f
+	@echo "Removal complete"

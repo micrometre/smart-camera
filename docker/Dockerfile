@@ -1,5 +1,5 @@
-# Build stage
-FROM node:22-alpine AS builder
+# Backend server stage
+FROM node:22-alpine AS backend
 
 WORKDIR /app
 
@@ -9,27 +9,36 @@ COPY package.json package-lock.json* ./
 # Install dependencies
 RUN npm ci
 
-# Copy source code
-COPY index.html ./
-COPY src ./src
-COPY public ./public
+# Copy server files
+COPY server.js ./
 
-# Build the Vite app
-RUN npm run build
+# Create public directory structure (will be mounted as volume)
+RUN mkdir -p public
 
-# Production stage
-FROM node:22-alpine
+# Expose backend port
+EXPOSE 3000
+
+# Start the backend server
+CMD ["node", "server.js"]
+
+# Frontend stage (static files)
+FROM node:22-alpine AS frontend
 
 WORKDIR /app
 
 # Install a simple static file server
 RUN npm install -g serve
 
-# Copy built assets from builder
-COPY --from=builder /app/dist ./dist
+# Copy HTML files
+COPY index.html ./
+COPY landing.html ./
+COPY dashboard.html ./
 
-# Expose port (will be proxied through nginx)
-EXPOSE 3000
+# Copy public directory
+COPY public ./public
 
-# Serve the dist folder
-CMD ["serve", "-s", "dist", "-l", "3000"]
+# Expose port
+EXPOSE 8080
+
+# Serve the current directory
+CMD ["serve", ".", "-l", "8080"]
