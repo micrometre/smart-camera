@@ -462,6 +462,7 @@
       <video id="webcam" autoplay muted playsinline></video>
 
       <div class="top-bar">
+        <a href="landing.html" style="color: white; text-decoration: none; font-size: 14px; font-weight: 500; padding: 4px 12px; background: rgba(103, 80, 164, 0.7); border-radius: 20px; backdrop-filter: blur(6px); pointer-events: all;">← Back to Home</a>
         <span class="status-pill" id="statusPill">Loading model&hellip;</span>
         <span class="backend-badge" id="backendBadge"></span>
         <span class="rec-timer" id="recTimer"><span class="dot"></span><span id="recTime">0:00</span></span>
@@ -521,8 +522,9 @@
     let model = undefined;
     let children = [];
     let minScore = 0.66;
-
-    // ── Recording state ──────────────────────────────────────────────
+    const BACKEND_URL = 'http://localhost:3000';
+    let lastBackendSend = 0;
+    const BACKEND_SEND_INTERVAL = 2000; // Send to backend every 2 seconds
     const RECORD_FPS = 10;        // playback speed for the detection-only video
     const MAX_CLIPS = 20;        // cap stored clips to limit memory use
     let streaming = false;     // webcam stream is live
@@ -540,6 +542,42 @@
       minScore = thresholdSlider.value / 100;
       thresholdVal.textContent = thresholdSlider.value + '%';
     });
+
+    // ── Send detections to backend ─────────────────────────────────────
+    async function sendDetectionsToBackend(detections) {
+      try {
+        // Capture current video frame as base64 image
+        let imageData = null;
+        if (video.readyState >= 2) {
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = video.videoWidth || 640;
+          tempCanvas.height = video.videoHeight || 480;
+          const tempCtx = tempCanvas.getContext('2d');
+          tempCtx.drawImage(video, 0, 0);
+          imageData = tempCanvas.toDataURL('image/png', 0.8);
+        }
+
+        const response = await fetch(`${BACKEND_URL}/api/detections`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            detections: detections,
+            timestamp: new Date().toISOString(),
+            image: imageData
+          })
+        });
+        
+        if (!response.ok) {
+          console.error('Failed to send detections to backend');
+        } else {
+          console.log('✅ Detections sent to backend successfully');
+        }
+      } catch (error) {
+        console.error('Error sending detections to backend:', error);
+      }
+    }
 
     // ── Backend initialisation ───────────────────────────────────────
     async function initBackend() {
@@ -681,6 +719,15 @@
 
         // Keep only confident detections.
         const detections = predictions.filter(p => p.score >= minScore);
+
+        // Send detections to backend periodically (rate-limited)
+        if (detections.length > 0) {
+          const now = Date.now();
+          if (now - lastBackendSend > BACKEND_SEND_INTERVAL) {
+            sendDetectionsToBackend(detections);
+            lastBackendSend = now;
+          }
+        }
 
         for (const pred of detections) {
           const left = pred.bbox[0] * scale + offsetX;

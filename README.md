@@ -44,6 +44,42 @@ Based on the [TensorFlow.js Object Detection Codelab](https://codelabs.developer
 - Mapping model coordinates to a full-screen `object-fit: cover` video feed
 - Drawing detection results as overlays
 
+## Backend API
+
+The project includes a Node.js/Express backend server to capture and store detected objects.
+
+### Installation
+
+```bash
+npm install
+```
+
+### Running the backend
+
+```bash
+npm run server
+```
+
+The server will start on `http://localhost:3000`.
+
+### API Endpoints
+
+- **POST /api/detections** - Capture detection data
+  - Body: `{ detections: [{ class, score, bbox }], timestamp }`
+  - Returns: `{ success: true, id }`
+
+- **GET /api/detections** - Retrieve detection history
+  - Query params: `limit` (number), `class` (filter by class)
+  - Returns: Array of detection entries (newest first)
+
+- **GET /api/stats** - Get detection statistics
+  - Returns: `{ totalEntries, totalDetections, classCounts, lastDetection }`
+
+- **DELETE /api/detections** - Clear all detection data
+  - Returns: `{ success: true }`
+
+Detection data is stored in `detections.json` (max 1000 entries).
+
 ## Next steps
 
 - [View all objects COCO-SSD can recognize](https://github.com/tensorflow/tfjs-models/blob/master/coco-ssd/src/classes.ts)
