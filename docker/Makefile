@@ -12,7 +12,7 @@ clean:
 mkcert:
 	@echo "Generating SSL certificates..."
 	mkdir -p nginx/certs
-	openssl req -x509 -newkey rsa:4096 -keyout nginx/certs/localhost-key.pem -out nginx/certs/localhost.pem -days 365 -nodes -subj "/CN=localhost"
+	openssl req -x509 -newkey rsa:4096 -keyout nginx/certs/localhost-key.pem -out nginx/certs/localhost.pem -days 365 -nodes -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,DNS:raccoon"
 	@echo "SSL certificates generated successfully"
 
 start:
