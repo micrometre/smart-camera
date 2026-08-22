@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Smart Camera - AI Object Detection</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --md-sys-color-primary: #6750A4;
+      --md-sys-color-on-primary: #FFFFFF;
+      --md-sys-color-surface: #FEF7FF;
+      --md-sys-color-on-surface: #1D1B20;
+      --md-sys-color-surface-container-low: #F7F2FA;
+      --md-sys-color-outline: #79747E;
+      --md-sys-color-secondary-container: #E8DEF8;
+      --md-sys-color-on-secondary-container: #1D192B;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: #fff;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Header */
+    header {
+      padding: 20px 0;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--md-sys-color-primary);
+      text-decoration: none;
+    }
+
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      margin-left: 30px;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--md-sys-color-primary);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 160px 0 100px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #6750A4, #9D4EDD);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 20px;
+      color: rgba(255, 255, 255, 0.8);
+      max-width: 600px;
+      margin: 0 auto 40px;
+    }
+
+    .cta-button {
+      display: inline-block;
+      padding: 16px 40px;
+      background: var(--md-sys-color-primary);
+      color: var(--md-sys-color-on-primary);
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 18px;
+      transition: transform 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 15px rgba(103, 80, 164, 0.4);
+    }
+
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(103, 80, 164, 0.6);
+    }
+
+    /* Features Section */
+    .features {
+      padding: 80px 0;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .features h2 {
+      text-align: center;
+      font-size: 36px;
+      margin-bottom: 60px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .feature-icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    .feature-card h3 {
+      font-size: 22px;
+      margin-bottom: 15px;
+      color: var(--md-sys-color-primary);
+    }
+
+    .feature-card p {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 16px;
+    }
+
+    /* How it works */
+    .how-it-works {
+      padding: 80px 0;
+    }
+
+    .how-it-works h2 {
+      text-align: center;
+      font-size: 36px;
+      margin-bottom: 60px;
+    }
+
+    .steps {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+
+    .step {
+      text-align: center;
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .step-number {
+      width: 60px;
+      height: 60px;
+      background: var(--md-sys-color-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0 auto 20px;
+    }
+
+    .step h3 {
+      margin-bottom: 10px;
+      font-size: 20px;
+    }
+
+    .step p {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Tech Stack */
+    .tech-stack {
+      padding: 80px 0;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .tech-stack h2 {
+      text-align: center;
+      font-size: 36px;
+      margin-bottom: 40px;
+    }
+
+    .tech-items {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .tech-item {
+      background: rgba(103, 80, 164, 0.3);
+      padding: 15px 30px;
+      border-radius: 30px;
+      font-weight: 500;
+      border: 1px solid rgba(103, 80, 164, 0.5);
+    }
+
+    /* API Docs */
+    .api-docs {
+      padding: 80px 0;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .api-docs h2 {
+      text-align: center;
+      font-size: 36px;
+      margin-bottom: 60px;
+    }
+    .endpoints {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 30px;
+    }
+    .endpoint {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      padding: 25px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: border-color 0.3s;
+    }
+    .endpoint:hover {
+      border-color: var(--md-sys-color-primary);
+    }
+    .endpoint-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+      font-family: monospace;
+      font-size: 18px;
+    }
+    .method {
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+    }
+    .method.get { background: #61affe; color: #000; }
+    .method.post { background: #49cc90; color: #000; }
+    .method.delete { background: #f93e3e; color: #fff; }
+    .endpoint p {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 15px;
+      margin-bottom: 15px;
+    }
+    .endpoint-details {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #e8def8;
+    }
+    .endpoint-details code {
+      font-family: monospace;
+      color: #bfa3e3;
+    }
+
+    /* Footer */
+    footer {
+      padding: 40px 0;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.3);
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 36px;
+      }
+
+      .hero p {
+        font-size: 18px;
+      }
+
+      .steps {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container header-content">
+      <a href="#" class="logo">🎥 Smart Camera</a>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How it Works</a>
+        <a href="#api">API Docs</a>
+        <a href="#tech">Technology</a>
+        <a href="dashboard.html">Dashboard</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h1>AI-Powered Object Detection</h1>
+      <p>Transform your webcam into an intelligent camera that detects and tracks objects in real-time using advanced machine learning.</p>
+      <a href="/index.html" class="cta-button">Launch Camera</a>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="container">
+      <h2>Key Features</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3>Real-Time Detection</h3>
+          <p>Detect 80+ object categories including people, vehicles, animals, and everyday items with high accuracy.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎬</div>
+          <h3>Smart Recording</h3>
+          <p>Only captures frames when objects are detected, creating efficient highlight reels instead of empty footage.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>GPU Accelerated</h3>
+          <p>Powered by WebGPU and WebGL backends for lightning-fast inference directly in your browser.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Detection Analytics</h3>
+          <p>Backend API stores detection history with images for analysis and statistics tracking.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <h3>Mobile Ready</h3>
+          <p>Optimized for mobile devices with touch-friendly controls and responsive design.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3>Privacy First</h3>
+          <p>All processing happens locally in your browser. No data is sent to external servers.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-it-works" id="how-it-works">
+    <div class="container">
+      <h2>How It Works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Start Camera</h3>
+          <p>Grant camera access and the app initializes the AI model</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Detect Objects</h3>
+          <p>The AI analyzes each frame and identifies objects in real-time</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Record Highlights</h3>
+          <p>Start recording to capture only frames with detected objects</p>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <h3>Export Video</h3>
+          <p>Download your condensed highlight reel as MP4 or WebM</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="api-docs" id="api">
+    <div class="container">
+      <h2>API Endpoints</h2>
+      <div class="endpoints">
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method post">POST</span>
+            <span>/api/detections</span>
+          </div>
+          <p>Capture and store new detection data along with captured images.</p>
+          <div class="endpoint-details">
+            <strong>Body:</strong> <code>{ detections: [...], timestamp }</code><br>
+            <strong>Returns:</strong> <code>{ success: true, id }</code>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span>/api/detections</span>
+          </div>
+          <p>Retrieve historical detection data and filtering parameters.</p>
+          <div class="endpoint-details">
+            <strong>Query:</strong> <code>?limit=number&class=string</code><br>
+            <strong>Returns:</strong> <code>Array of detection objects</code>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span>/api/stats</span>
+          </div>
+          <p>Get high-level detection statistics and object counts.</p>
+          <div class="endpoint-details">
+            <strong>Returns:</strong> <code>{ totalEntries, classCounts... }</code>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method delete">DELETE</span>
+            <span>/api/detections</span>
+          </div>
+          <p>Wipe all stored detection history and captured images.</p>
+          <div class="endpoint-details">
+            <strong>Returns:</strong> <code>{ success: true }</code>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tech-stack" id="tech">
+    <div class="container">
+      <h2>Powered By</h2>
+      <div class="tech-items">
+        <div class="tech-item">TensorFlow.js</div>
+        <div class="tech-item">COCO-SSD Model</div>
+        <div class="tech-item">WebGPU</div>
+        <div class="tech-item">WebGL</div>
+        <div class="tech-item">Next.js App Router</div>
+        <div class="tech-item">React</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p>Built with ❤️ using TensorFlow.js and modern web technologies</p>
+    </div>
+  </footer>
+</body>
+</html>
