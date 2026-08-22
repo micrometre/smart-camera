@@ -26,3 +26,11 @@ dist-ssr
 .vercel
 docker/nginx/certs/*
 docker/nginx/logs/*
+
+# Next.js
+.next
+out
+next-env.d.ts
+
+# Local App Data
+detections.json
