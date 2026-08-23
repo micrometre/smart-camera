@@ -100,8 +100,8 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 24px;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 16px;
     }
 
     .card {
@@ -121,7 +121,7 @@
 
     .card-image-wrapper {
       position: relative;
-      padding-top: 75%; /* 4:3 aspect ratio */
+      padding-top: 100%; /* 1:1 aspect ratio for thumbnails */
       background: #000;
       overflow: hidden;
     }
@@ -141,20 +141,23 @@
     }
 
     .card-content {
-      padding: 16px;
+      padding: 12px;
     }
 
     .card-title {
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 500;
       color: #fff;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .card-meta {
-      font-size: 12px;
+      font-size: 10px;
       color: rgba(255, 255, 255, 0.6);
-      margin-bottom: 16px;
+      margin-bottom: 8px;
     }
 
     .tags {
@@ -166,9 +169,9 @@
     .tag {
       background: rgba(103, 80, 164, 0.2);
       color: #d0bcf1;
-      padding: 4px 8px;
+      padding: 2px 6px;
       border-radius: 4px;
-      font-size: 11px;
+      font-size: 9px;
       border: 1px solid rgba(103, 80, 164, 0.3);
     }
 
@@ -235,6 +238,43 @@
     .empty-state h3 { margin-bottom: 8px; color: #fff; }
     .empty-state p { color: rgba(255, 255, 255, 0.6); }
 
+    /* Pagination */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-top: 30px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .pagination button {
+      padding: 8px 16px;
+      background: rgba(103, 80, 164, 0.3);
+      color: white;
+      border: 1px solid rgba(103, 80, 164, 0.5);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .pagination button:hover:not(:disabled) {
+      background: rgba(103, 80, 164, 0.6);
+    }
+
+    .pagination button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .pagination-info {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 14px;
+    }
+
     @media (max-width: 768px) {
       .toolbar {
         flex-direction: column;
@@ -271,7 +311,13 @@
     <div id="gallery" class="grid">
       <!-- Cards will be injected here -->
     </div>
-    
+
+    <div id="pagination" class="pagination" style="display: none;">
+      <button id="prevBtn" disabled>← Previous</button>
+      <span class="pagination-info">Page <span id="currentPage">1</span> of <span id="totalPages">1</span></span>
+      <button id="nextBtn" disabled>Next →</button>
+    </div>
+
     <div id="emptyState" class="empty-state" style="display: none;">
       <h3>No detections yet</h3>
       <p>Start the camera to capture some detections.</p>
@@ -287,15 +333,23 @@
     const selectedCountEl = document.getElementById('selectedCount');
     const selectAllBtn = document.getElementById('selectAllBtn');
     const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+    const pagination = document.getElementById('pagination');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const currentPageEl = document.getElementById('currentPage');
+    const totalPagesEl = document.getElementById('totalPages');
 
     let detections = [];
     let selectedIds = new Set();
+    let currentPage = 1;
+    const itemsPerPage = 100;
     const API_URL = '/api/detections';
 
     async function fetchDetections() {
       try {
         const response = await fetch(API_URL);
         detections = await response.json();
+        currentPage = 1;
         renderGallery();
       } catch (err) {
         console.error('Failed to fetch detections', err);
@@ -305,15 +359,33 @@
     function renderGallery() {
       totalCountEl.textContent = detections.length;
       gallery.innerHTML = '';
-      
+
       if (detections.length === 0) {
         emptyState.style.display = 'block';
+        pagination.style.display = 'none';
         return;
       }
-      
+
       emptyState.style.display = 'none';
 
-      detections.forEach(item => {
+      // Calculate pagination
+      const totalPages = Math.ceil(detections.length / itemsPerPage);
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const pageItems = detections.slice(startIndex, endIndex);
+
+      // Update pagination UI
+      if (detections.length > itemsPerPage) {
+        pagination.style.display = 'flex';
+        currentPageEl.textContent = currentPage;
+        totalPagesEl.textContent = totalPages;
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages;
+      } else {
+        pagination.style.display = 'none';
+      }
+
+      pageItems.forEach(item => {
         const hasImage = !!item.imagePath;
         const imgUrl = hasImage ? item.imagePath : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23222"/><text x="50" y="50" fill="%23666" text-anchor="middle" dominant-baseline="middle">No Image</text></svg>';
         
@@ -370,8 +442,13 @@
     function updateActionState() {
       selectedCountEl.textContent = selectedIds.size;
       deleteSelectedBtn.disabled = selectedIds.size === 0;
-      
-      if (detections.length > 0 && selectedIds.size === detections.length) {
+
+      const totalPages = Math.ceil(detections.length / itemsPerPage);
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const pageItems = detections.slice(startIndex, endIndex);
+
+      if (pageItems.length > 0 && selectedIds.size === pageItems.length) {
         selectAllBtn.textContent = 'Deselect All';
       } else {
         selectAllBtn.textContent = 'Select All';
@@ -379,14 +456,37 @@
     }
 
     selectAllBtn.addEventListener('click', () => {
-      if (selectedIds.size === detections.length) {
-        // Deselect all
-        selectedIds.clear();
+      const totalPages = Math.ceil(detections.length / itemsPerPage);
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const pageItems = detections.slice(startIndex, endIndex);
+
+      const allPageSelected = pageItems.every(d => selectedIds.has(d.id));
+
+      if (allPageSelected) {
+        // Deselect all on current page
+        pageItems.forEach(d => selectedIds.delete(d.id));
       } else {
-        // Select all
-        detections.forEach(d => selectedIds.add(d.id));
+        // Select all on current page
+        pageItems.forEach(d => selectedIds.add(d.id));
       }
       renderGallery();
+    });
+
+    // Pagination event listeners
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderGallery();
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      const totalPages = Math.ceil(detections.length / itemsPerPage);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderGallery();
+      }
     });
 
     deleteSelectedBtn.addEventListener('click', () => {

@@ -406,7 +406,12 @@
       statusPill.textContent = 'Starting camera\u2026';
       thresholdRow.classList.add('visible');
 
+      // Try environment camera first, fallback to any available camera
       navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .catch(err => {
+          console.warn('Could not start environment camera, falling back to default camera:', err);
+          return navigator.mediaDevices.getUserMedia({ video: true });
+        })
         .then(stream => {
           video.srcObject = stream;
           video.addEventListener('loadeddata', () => {
@@ -418,10 +423,14 @@
           }, { once: true });
         })
         .catch(err => {
-          statusPill.textContent = 'Camera access denied';
+          statusPill.textContent = 'Camera error';
           enableBtn.classList.remove('active');
           thresholdRow.classList.remove('visible');
-          console.error(err);
+          console.error('Final camera access error:', err);
+          
+          if (err.name === 'NotReadableError') {
+            alert('Camera is currently in use by another application or tab. Please close other tabs using the camera and try again.');
+          }
         });
     }
 

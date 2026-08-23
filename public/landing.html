@@ -297,6 +297,75 @@
       color: #bfa3e3;
     }
 
+    /* Advanced Features */
+    .advanced-features {
+      padding: 80px 0;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .advanced-features h2 {
+      text-align: center;
+      font-size: 36px;
+      margin-bottom: 60px;
+    }
+
+    .advanced-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 40px;
+    }
+
+    .advanced-item {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 35px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s;
+    }
+
+    .advanced-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(103, 80, 164, 0.5);
+      transform: translateY(-3px);
+    }
+
+    .advanced-item h3 {
+      font-size: 24px;
+      margin-bottom: 15px;
+      color: var(--md-sys-color-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .advanced-item p {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 16px;
+      line-height: 1.7;
+      margin-bottom: 15px;
+    }
+
+    .advanced-item ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .advanced-item li {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 15px;
+      padding: 8px 0;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .advanced-item li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--md-sys-color-primary);
+    }
+
     /* Footer */
     footer {
       padding: 40px 0;
@@ -346,6 +415,10 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
+      }
+
+      .advanced-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -488,6 +561,74 @@
         <div class="tech-item">WebGL</div>
         <div class="tech-item">Next.js App Router</div>
         <div class="tech-item">React</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="advanced-features">
+    <div class="container">
+      <h2>Advanced Features</h2>
+      <div class="advanced-grid">
+        <div class="advanced-item">
+          <h3>🧠 AI Model Optimization</h3>
+          <p>The COCO-SSD model is optimized for real-time performance with the MobileNet V2 architecture, providing fast inference while maintaining high accuracy across 80 object categories.</p>
+          <ul>
+            <li>Lite model for faster loading and inference</li>
+            <li>Supports both WebGPU and WebGL backends</li>
+            <li>Automatic GPU acceleration detection</li>
+            <li>Fallback to WebGL when WebGPU unavailable</li>
+          </ul>
+        </div>
+        <div class="advanced-item">
+          <h3>🎥 Smart Recording Engine</h3>
+          <p>Intelligent recording system that captures frames only when objects are detected, creating efficient highlight reels without wasting storage on empty footage.</p>
+          <ul>
+            <li>Configurable confidence threshold slider</li>
+            <li>Pause/resume recording during capture</li>
+            <li>Real-time frame counter and timer</li>
+            <li>Export to MP4 or WebM formats</li>
+          </ul>
+        </div>
+        <div class="advanced-item">
+          <h3>📡 Backend Integration</h3>
+          <p>RESTful API backend for storing detection data and images, enabling advanced analytics and historical tracking of detected objects.</p>
+          <ul>
+            <li>Automatic image capture with detections</li>
+            <li>JSON-based detection history storage</li>
+            <li>Statistics and analytics endpoints</li>
+            <li>Bulk deletion and filtering capabilities</li>
+          </ul>
+        </div>
+        <div class="advanced-item">
+          <h3>🌐 Cloud Deployment Ready</h3>
+          <p>Designed for modern cloud platforms with serverless architecture support, making deployment to Vercel, Netlify, or similar platforms seamless.</p>
+          <ul>
+            <li>Vercel API functions for serverless backend</li>
+            <li>Automatic SSL and HTTPS support</li>
+            <li>Edge deployment for global performance</li>
+            <li>Environment variable configuration</li>
+          </ul>
+        </div>
+        <div class="advanced-item">
+          <h3>🎨 Modern UI/UX Design</h3>
+          <p>Built with Material Design principles and modern CSS techniques for a polished, responsive interface that works across all devices.</p>
+          <ul>
+            <li>Material Design 3 color system</li>
+            <li>Responsive grid layouts</li>
+            <li>Touch-friendly controls for mobile</li>
+            <li>Smooth animations and transitions</li>
+          </ul>
+        </div>
+        <div class="advanced-item">
+          <h3>🔒 Privacy & Security</h3>
+          <p>All computer vision processing happens entirely in your browser, ensuring your camera feed never leaves your device without your consent.</p>
+          <ul>
+            <li>Local-only processing (no cloud AI)</li>
+            <li>No data sent to external servers</li>
+            <li>Optional backend for data persistence</li>
+            <li>HTTPS encryption for API communications</li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
