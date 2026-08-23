@@ -50,6 +50,7 @@
       height: 100vh;
       height: 100dvh;
       background-color: #000;
+      box-sizing: border-box;
     }
 
     .camView {
@@ -123,7 +124,7 @@
     /* Confidence slider row */
     .threshold-row {
       position: absolute;
-      bottom: 120px;
+      bottom: 140px;
       left: 0;
       right: 0;
       padding: 0 32px;
@@ -196,52 +197,13 @@
       left: 0;
       right: 0;
       bottom: 0;
-      padding: 24px 24px calc(env(safe-area-inset-bottom, 0px) + 28px);
+      padding: 24px 24px calc(env(safe-area-inset-bottom, 0px) + 32px);
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 28px;
       z-index: 10;
       background: linear-gradient(to top, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0));
-    }
-
-    /* Pause / resume button — styled like the shutter, shown only while recording */
-    .icon-btn {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      border: 4px solid rgba(255, 255, 255, 0.9);
-      padding: 0;
-      cursor: pointer;
-      background-color: #fff;
-      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.25);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-      transition: transform 120ms ease;
-    }
-
-    .icon-btn[hidden] { display: none; }
-    .icon-btn:active { transform: scale(0.92); }
-
-    /* Two bars = pause */
-    .icon-btn.pause::before,
-    .icon-btn.pause::after {
-      content: '';
-      width: 5px;
-      height: 16px;
-      border-radius: 2px;
-      background-color: var(--md-sys-color-primary);
-    }
-
-    /* Triangle = resume */
-    .icon-btn.play::before {
-      content: '';
-      margin-left: 3px;
-      border-style: solid;
-      border-width: 9px 0 9px 15px;
-      border-color: transparent transparent transparent var(--md-sys-color-primary);
     }
 
     .shutter {
@@ -263,31 +225,6 @@
     .shutter.active {
       background-color: var(--md-sys-color-primary);
       box-shadow: 0 0 0 4px rgba(103, 80, 164, 0.35);
-    }
-
-    /* Recording state: red dot that morphs into a stop square */
-    .shutter.recording {
-      background-color: #e53935;
-      border-color: rgba(255, 255, 255, 0.9);
-      box-shadow: 0 0 0 4px rgba(229, 57, 53, 0.35);
-      position: relative;
-    }
-
-    .shutter.recording::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 26px;
-      height: 26px;
-      border-radius: 6px;
-      background-color: #fff;
-      transform: translate(-50%, -50%);
-    }
-
-    .shutter:disabled {
-      opacity: 0.5;
-      cursor: default;
     }
 
     /* Detection overlays */
@@ -313,146 +250,6 @@
       pointer-events: none;
     }
 
-    /* Recorded-clips gallery */
-    .gallery {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      right: 0;
-      width: 88px;
-      padding: calc(env(safe-area-inset-top, 0px) + 64px) 8px 120px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      overflow-y: auto;
-      z-index: 11;
-      scrollbar-width: none;
-    }
-
-    .gallery::-webkit-scrollbar {
-      display: none;
-    }
-
-    .gallery:empty {
-      display: none;
-    }
-
-    .gallery .clip {
-      position: relative;
-      flex: 0 0 auto;
-      width: 72px;
-      height: 72px;
-      border-radius: 12px;
-      border: 2px solid rgba(255, 255, 255, 0.85);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-      background: #222 center / cover no-repeat;
-      cursor: pointer;
-      transition: transform 120ms ease;
-      text-decoration: none;
-    }
-
-    .gallery .clip:active {
-      transform: scale(0.94);
-    }
-
-    .gallery .clip .play-badge {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      background-color: rgba(0, 0, 0, 0.55);
-      transform: translate(-50%, -50%);
-    }
-
-    .gallery .clip .play-badge::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 54%;
-      transform: translate(-50%, -50%);
-      border-style: solid;
-      border-width: 6px 0 6px 10px;
-      border-color: transparent transparent transparent #fff;
-    }
-
-    .gallery .clip .clip-label {
-      position: absolute;
-      left: 4px;
-      bottom: 4px;
-      right: 4px;
-      font-size: 9px;
-      font-weight: 600;
-      line-height: 1.2;
-      padding: 2px 4px;
-      border-radius: 6px;
-      background-color: rgba(0, 0, 0, 0.55);
-      color: #fff;
-      text-align: center;
-      pointer-events: none;
-    }
-
-    /* Recording timer pill */
-    .rec-timer {
-      display: none;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 6px 14px;
-      border-radius: 999px;
-      background-color: rgba(229, 57, 53, 0.85);
-      color: #fff;
-    }
-
-    .rec-timer.visible {
-      display: inline-flex;
-    }
-
-    .rec-timer .dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background-color: #fff;
-      animation: blink 1s steps(1) infinite;
-    }
-
-    /* Steady, dimmed dot while paused */
-    .rec-timer.paused .dot {
-      animation: none;
-      opacity: 0.4;
-    }
-
-    @keyframes blink {
-      50% {
-        opacity: 0;
-      }
-    }
-
-    /* Flash feedback on record start/stop */
-    .flash {
-      position: absolute;
-      inset: 0;
-      background-color: #fff;
-      opacity: 0;
-      pointer-events: none;
-      z-index: 30;
-    }
-
-    .flash.fire {
-      animation: flash 320ms ease-out;
-    }
-
-    @keyframes flash {
-      0% {
-        opacity: 0.85;
-      }
-
-      100% {
-        opacity: 0;
-      }
-    }
   </style>
 </head>
 
@@ -462,10 +259,8 @@
       <video id="webcam" autoplay muted playsinline></video>
 
       <div class="top-bar">
-        <a href="/" style="color: white; text-decoration: none; font-size: 14px; font-weight: 500; padding: 4px 12px; background: rgba(103, 80, 164, 0.7); border-radius: 20px; backdrop-filter: blur(6px); pointer-events: all;">← Back to Home</a>
         <span class="status-pill" id="statusPill">Loading model&hellip;</span>
         <span class="backend-badge" id="backendBadge"></span>
-        <span class="rec-timer" id="recTimer"><span class="dot"></span><span id="recTime">0:00</span></span>
       </div>
 
       <div class="loader" id="loader">
@@ -479,19 +274,11 @@
         <input type="range" id="thresholdSlider" min="10" max="95" value="66" step="1">
       </div>
 
-      <div class="gallery" id="gallery"></div>
-
-      <div class="flash" id="flash"></div>
-
       <div class="controls">
         <button id="webcamButton" class="shutter" aria-label="Enable webcam"></button>
-        <button id="pauseButton" class="icon-btn pause" aria-label="Pause recording" hidden></button>
       </div>
     </div>
   </main>
-
-  <!-- Off-screen canvas: annotated frames are drawn here and recorded via captureStream() -->
-  <canvas id="captureCanvas" hidden></canvas>
 
   <!-- TensorFlow.js core -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
@@ -511,13 +298,6 @@
     const thresholdRow = document.getElementById('thresholdRow');
     const thresholdSlider = document.getElementById('thresholdSlider');
     const thresholdVal = document.getElementById('thresholdVal');
-    const gallery = document.getElementById('gallery');
-    const flash = document.getElementById('flash');
-    const recTimer = document.getElementById('recTimer');
-    const recTime = document.getElementById('recTime');
-    const pauseBtn = document.getElementById('pauseButton');
-    const captureCanvas = document.getElementById('captureCanvas');
-    const captureCtx = captureCanvas.getContext('2d');
 
     let model = undefined;
     let children = [];
@@ -525,17 +305,7 @@
     const BACKEND_URL = window.location.origin;
     let lastBackendSend = 0;
     const BACKEND_SEND_INTERVAL = 2000; // Send to backend every 2 seconds
-    const RECORD_FPS = 10;        // playback speed for the detection-only video
-    const MAX_CLIPS = 20;        // cap stored clips to limit memory use
     let streaming = false;     // webcam stream is live
-    let isRecording = false;
-    let isPaused = false;      // recording paused (frames not captured)
-    let isExporting = false;     // rendering the final video
-    let recordedFrames = [];      // ImageBitmaps of detection events
-    let mediaRecorder = null;
-    let recordedChunks = [];
-    let recStartTs = 0;
-    let recTimerId = null;
 
     // ── Confidence slider ────────────────────────────────────────────
     thresholdSlider.addEventListener('input', () => {
@@ -627,9 +397,8 @@
 
     // The shutter has three roles: start the camera, then start/stop recording.
     async function onShutter() {
-      if (!model || isExporting) return;
+      if (!model) return;
       if (!streaming) { enableCam(); return; }
-      if (!isRecording) startRecording(); else await stopRecording();
     }
 
     function enableCam() {
@@ -643,7 +412,8 @@
           video.addEventListener('loadeddata', () => {
             streaming = true;
             enableBtn.classList.remove('active');
-            statusPill.textContent = 'Tap to record';
+            enableBtn.style.display = 'none';
+            statusPill.textContent = 'Detecting objects...';
             predictWebcam();
           }, { once: true });
         })
@@ -753,244 +523,13 @@
           children.push(box, label);
         }
 
-        // While recording, capture and store the annotated frame only if objects are detected.
-        if (isRecording && !isPaused && detections.length > 0 && recordedFrames.length < 1000) {
-          drawAnnotatedFrame(detections, srcW, srcH);
-          createImageBitmap(captureCanvas).then(bitmap => {
-            recordedFrames.push(bitmap);
-
-            // Brief flash on the first frame of a detection sequence
-            if (recordedFrames.length % 10 === 1) {
-              flash.classList.remove('fire');
-              void flash.offsetWidth;
-              flash.classList.add('fire');
-            }
-          });
-        }
 
         window.requestAnimationFrame(predictWebcam);
       }
     }
 
-    // ── Draw only the detected regions (black background) onto the canvas ────
-    function drawAnnotatedFrame(detections, srcW, srcH) {
-      // Black out the whole frame, then copy just the detected object regions.
-      captureCtx.fillStyle = '#000';
-      captureCtx.fillRect(0, 0, srcW, srcH);
-
-      for (const pred of detections) {
-        let [x, y, w, h] = pred.bbox;
-        // Clamp the source rectangle to the video bounds.
-        x = Math.max(0, x);
-        y = Math.max(0, y);
-        w = Math.min(w, srcW - x);
-        h = Math.min(h, srcH - y);
-        if (w <= 0 || h <= 0) continue;
-        captureCtx.drawImage(video, x, y, w, h, x, y, w, h);
-      }
-
-      captureCtx.lineWidth = Math.max(2, Math.round(srcW / 320));
-      captureCtx.strokeStyle = '#6750A4';
-      captureCtx.font = `${Math.max(14, Math.round(srcW / 36))}px Roboto, sans-serif`;
-      captureCtx.textBaseline = 'top';
-
-      for (const pred of detections) {
-        const [x, y, w, h] = pred.bbox;
-        captureCtx.strokeRect(x, y, w, h);
-
-        const text = `${pred.class} ${Math.round(pred.score * 100)}%`;
-        const padX = 6;
-        const textW = captureCtx.measureText(text).width;
-        const labelH = Math.max(18, Math.round(srcW / 26));
-        const labelY = Math.max(0, y - labelH);
-
-        captureCtx.fillStyle = '#6750A4';
-        captureCtx.fillRect(x, labelY, textW + padX * 2, labelH);
-        captureCtx.fillStyle = '#FFFFFF';
-        captureCtx.fillText(text, x + padX, labelY + 3);
-      }
-    }
-
-    // ── Recording: start / stop / export ─────────────────────────────
-    function pickMimeType() {
-      const candidates = [
-        'video/mp4',
-        'video/webm;codecs=vp9',
-        'video/webm;codecs=vp8',
-        'video/webm'
-      ];
-      return candidates.find(t => window.MediaRecorder &&
-        MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
-    }
-
-    function startRecording() {
-      if (isExporting) return;
-
-      const srcW = video.videoWidth || 640;
-      const srcH = video.videoHeight || 480;
-      captureCanvas.width = srcW;
-      captureCanvas.height = srcH;
-
-      recordedFrames = [];
-      isRecording = true;
-      isPaused = false;
-      recStartTs = performance.now();
-      enableBtn.classList.add('recording');
-      enableBtn.setAttribute('aria-label', 'Stop recording');
-      recTimer.classList.add('visible');
-      recTimer.classList.remove('paused');
-      showPauseButton(true);
-      updateRecTimer();
-      recTimerId = setInterval(updateRecTimer, 250);
-
-      statusPill.textContent = 'Capturing detections...';
-    }
-
-    // ── Pause / resume capture ───────────────────────────────────────
-    pauseBtn.addEventListener('click', togglePause);
-
-    function togglePause() {
-      if (!isRecording) return;
-      isPaused = !isPaused;
-      recTimer.classList.toggle('paused', isPaused);
-      pauseBtn.classList.toggle('pause', !isPaused);
-      pauseBtn.classList.toggle('play', isPaused);
-      pauseBtn.setAttribute('aria-label', isPaused ? 'Resume recording' : 'Pause recording');
-      statusPill.textContent = isPaused ? 'Paused' : 'Capturing detections...';
-    }
-
-    function showPauseButton(show) {
-      pauseBtn.hidden = !show;
-      pauseBtn.classList.toggle('pause', show);
-      pauseBtn.classList.remove('play');
-      pauseBtn.setAttribute('aria-label', 'Pause recording');
-    }
-
-    async function stopRecording() {
-      if (!isRecording) return;
-      isRecording = false;
-      isPaused = false;
-      clearInterval(recTimerId);
-
-      enableBtn.classList.remove('recording');
-      enableBtn.setAttribute('aria-label', 'Start recording');
-      recTimer.classList.remove('paused');
-      showPauseButton(false);
-
-      if (recordedFrames.length === 0) {
-        statusPill.textContent = 'No detections captured';
-        recTimer.classList.remove('visible');
-        return;
-      }
-
-      await renderAndExport();
-    }
-
-    async function renderAndExport() {
-      isExporting = true;
-      statusPill.textContent = 'Exporting MP4...';
-      enableBtn.disabled = true;
-
-      const mimeType = pickMimeType();
-      const stream = captureCanvas.captureStream(RECORD_FPS);
-
-      try {
-        mediaRecorder = mimeType
-          ? new MediaRecorder(stream, { mimeType })
-          : new MediaRecorder(stream);
-      } catch (e) {
-        statusPill.textContent = 'Export failed';
-        console.error(e);
-        isExporting = false;
-        enableBtn.disabled = false;
-        return;
-      }
-
-      recordedChunks = [];
-      mediaRecorder.ondataavailable = e => { if (e.data && e.data.size) recordedChunks.push(e.data); };
-
-      const exportPromise = new Promise(resolve => {
-        mediaRecorder.onstop = () => {
-          exportRecording();
-          resolve();
-        };
-      });
-
-      mediaRecorder.start();
-
-      // Playback the captured frames to the canvas for the MediaRecorder
-      for (const frame of recordedFrames) {
-        captureCtx.drawImage(frame, 0, 0);
-        // Wait for the next frame slot
-        await new Promise(r => setTimeout(r, 1000 / RECORD_FPS));
-        frame.close(); // release memory
-      }
-
-      mediaRecorder.stop();
-      await exportPromise;
-
-      recordedFrames = [];
-      isExporting = false;
-      enableBtn.disabled = false;
-      recTimer.classList.remove('visible');
-      statusPill.textContent = 'Tap to record';
-    }
-
-    function updateRecTimer() {
-      const count = recordedFrames.length;
-      recTime.textContent = `${count} frame${count === 1 ? '' : 's'}`;
-    }
-
-    function exportRecording() {
-      if (!recordedChunks.length) return;
-
-      const type = (mediaRecorder && mediaRecorder.mimeType) || 'video/webm';
-      const blob = new Blob(recordedChunks, { type });
-      const url = URL.createObjectURL(blob);
-      const ext = type.includes('mp4') ? 'mp4' : 'webm';
-      // UK-format date & time: DD-MM-YYYY_HH-MM-SS
-      const now = new Date();
-      const pad = n => String(n).padStart(2, '0');
-      const stamp = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()}` +
-        `_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
-      const poster = captureCanvas.toDataURL('image/jpeg', 0.6);
-      const dur = `${recordedFrames.length} f`;
-
-      addClipToGallery(url, `${stamp}.${ext}`, poster, dur);
-
-      flash.classList.remove('fire');
-      void flash.offsetWidth; // restart animation
-      flash.classList.add('fire');
-    }
-
-    // ── Add a recorded clip to the gallery (newest first) ────────────
-    function addClipToGallery(url, filename, poster, dur) {
-      const clip = document.createElement('a');
-      clip.className = 'clip';
-      clip.href = url;
-      clip.download = filename;
-      clip.title = 'Tap to download recording';
-      if (poster) clip.style.backgroundImage = `url(${poster})`;
-
-      const badge = document.createElement('span');
-      badge.className = 'play-badge';
-
-      const label = document.createElement('span');
-      label.className = 'clip-label';
-      label.textContent = dur;
-
-      clip.appendChild(badge);
-      clip.appendChild(label);
-      gallery.prepend(clip);
-
-      // Trim old clips and release their object URLs.
-      while (gallery.children.length > MAX_CLIPS) {
-        const old = gallery.lastChild;
-        if (old.href) URL.revokeObjectURL(old.href);
-        gallery.removeChild(old);
-      }
-    }
   </script>
+  <script src="/navigation.js"></script>
 </body>
 
 </html>
