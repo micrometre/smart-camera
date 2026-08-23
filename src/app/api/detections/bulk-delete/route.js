@@ -2,7 +2,8 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { NextResponse } from 'next/server';
 
-const DATA_FILE = path.join(process.cwd(), 'detections.json');
+const IS_VERCEL = !!process.env.VERCEL;
+const DATA_FILE = IS_VERCEL ? '/tmp/detections.json' : path.join(process.cwd(), 'detections.json');
 
 export async function POST(request) {
   try {
@@ -23,7 +24,9 @@ export async function POST(request) {
     
     for (const entry of toDelete) {
       if (entry.imagePath) {
-        const imgPath = path.join(process.cwd(), 'public', entry.imagePath);
+        const imgPath = IS_VERCEL 
+          ? path.join('/tmp', entry.imagePath.replace('/images/', 'images/')) 
+          : path.join(process.cwd(), 'public', entry.imagePath);
         await fs.unlink(imgPath).catch(() => {});
       }
     }
