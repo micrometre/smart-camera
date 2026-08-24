@@ -7,18 +7,18 @@ A full-screen, Android-style camera app that performs real-time object detection
 - Captures a live webcam stream in the browser
 - Detects common objects (people, cars, pets, etc.) in real time
 - Draws bounding boxes and confidence scores around detected objects
-- **Detection-Only Export** - Instead of recording empty video, the app captures frames only when objects are detected and compiles them into a condensed MP4/WebM video
-- **Intelligent Frame Capture** - Efficiently stores detection events as ImageBitmaps to preserve memory during capture
-- **In-Browser Rendering** - Reconstructs the video at a smooth 10 FPS upon stopping the recording
+- **OPFS Local Storage** - Securely stores detections and images in your browser using Origin Private File System and SQLite-WASM.
+- **Offline Capable** - No external backend needed for storage. Everything is isolated to the client.
 - **WebGPU / WebGL** - GPU-accelerated backends for fast inference
 - **COCO-SSD** - Pre-trained object detection model trained on the COCO dataset
-- **Gallery & Download** - Recorded clips appear in a sidebar gallery; tap to download the processed file
+- **Detection Dashboard** - Browse detection history and manage records locally and offline.
 
 ## How it works
 
-The app initializes the GPU backend and loads the COCO-SSD model. Once recording is active, the system monitors the video feed but only captures frames when objects are detected above the user-defined confidence threshold. 
-
-When recording is stopped, the app enters an **Export Phase**: it renders the stored detection frames sequentially to a hidden canvas and records the stream using the `MediaRecorder` API. This results in a "highlight reel" video containing only relevant detection events, exported as an MP4 or WebM file.
+1. **Start Camera** - Grant camera access and the app initializes the GPU backend and AI model.
+2. **Detect Objects** - The AI analyzes each frame and identifies objects in real-time above a defined confidence threshold.
+3. **Capture Locally** - When objects are detected, snapshots and metadata are saved automatically to your browser's private file system using SQLite-WASM.
+4. **Review Data** - You can view and manage your captured detections offline in the dashboard powered by local SQLite.
 
 ## Running the App (Next.js)
 
@@ -45,29 +45,15 @@ Based on the [TensorFlow.js Object Detection Codelab](https://codelabs.developer
 - Mapping model coordinates to a full-screen `object-fit: cover` video feed
 - Drawing detection results as overlays
 
-## Full-Stack Architecture
+## Storage Architecture
 
-The project now leverages Next.js App Router for seamless API integration and rendering.
+This app utilizes a **Local-First Architecture**. Instead of persisting data to an ephemeral serverless backend, all detection history is stored directly on the client.
 
-### API Routes
+### OPFS & SQLite-WASM
 
-The backend API routes are available under `/api/...` and allow you to capture and store detected objects.
-
-- **POST /api/detections** - Capture detection data
-  - Body: `{ detections: [{ class, score, bbox }], timestamp }`
-  - Returns: `{ success: true, id }`
-
-- **GET /api/detections** - Retrieve detection history
-  - Query params: `limit` (number), `class` (filter by class)
-  - Returns: Array of detection entries (newest first)
-
-- **GET /api/stats** - Get detection statistics
-  - Returns: `{ totalEntries, totalDetections, classCounts, lastDetection }`
-
-- **DELETE /api/detections** - Clear all detection data
-  - Returns: `{ success: true }`
-
-Detection data is currently saved locally to `detections.json` and images to `public/images/`. 
+- **Origin Private File System (OPFS)**: The browser's native, high-performance file system.
+- **SQLite-WASM**: An official WebAssembly build of SQLite that leverages OPFS for data persistence.
+- **COOP/COEP Headers**: The Next.js `next.config.mjs` enables Cross-Origin isolation (`Cross-Origin-Opener-Policy` and `Cross-Origin-Embedder-Policy`), which allows the use of `SharedArrayBuffer` for blazing-fast SQLite operations in the browser. 
 
 ## Deployment
 
@@ -83,7 +69,7 @@ npx vercel
 ```
 
 **Note on Vercel Data Persistence:**
-Because Vercel uses a serverless, read-only file system in production, the local saving of `detections.json` and `public/images/` will not persist across function invocations. To enable permanent storage on Vercel, you will need to replace the local file writing logic in `/app/api/detections/route.js` with cloud storage solutions like Vercel Postgres for data and Vercel Blob (or AWS S3) for images.
+Because the app uses OPFS for storage, it avoids Vercel's ephemeral serverless file system limitations entirely. Your detections will persist securely in your browser's file system across sessions without needing a cloud database!
 
 ### Deploying with Docker
 

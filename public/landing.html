@@ -442,9 +442,9 @@
           <p>Detect 80+ object categories including people, vehicles, animals, and everyday items with high accuracy.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">🎬</div>
-          <h3>Smart Recording</h3>
-          <p>Only captures frames when objects are detected, creating efficient highlight reels instead of empty footage.</p>
+          <div class="feature-icon">💾</div>
+          <h3>OPFS Local Storage</h3>
+          <p>Uses the Origin Private File System and SQLite-WASM to securely store detections locally in your browser.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">⚡</div>
@@ -453,8 +453,8 @@
         </div>
         <div class="feature-card">
           <div class="feature-icon">📊</div>
-          <h3>Detection Analytics</h3>
-          <p>Backend API stores detection history with images for analysis and statistics tracking.</p>
+          <h3>Detection Dashboard</h3>
+          <p>Review detection history and captured images directly from your local browser database, completely offline.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">📱</div>
@@ -486,66 +486,41 @@
         </div>
         <div class="step">
           <div class="step-number">3</div>
-          <h3>Record Highlights</h3>
-          <p>Start recording to capture only frames with detected objects</p>
+          <h3>Capture Locally</h3>
+          <p>Detections and snapshots are saved automatically to your browser's private file system</p>
         </div>
         <div class="step">
           <div class="step-number">4</div>
-          <h3>Export Video</h3>
-          <p>Download your condensed highlight reel as MP4 or WebM</p>
+          <h3>Review Data</h3>
+          <p>View your captured detections and images in the dashboard powered by local SQLite</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="api-docs" id="api">
+  <section class="api-docs" id="storage">
     <div class="container">
-      <h2>API Endpoints</h2>
+      <h2>Storage Architecture</h2>
       <div class="endpoints">
         <div class="endpoint">
           <div class="endpoint-header">
-            <span class="method post">POST</span>
-            <span>/api/detections</span>
+            <span>Origin Private File System</span>
           </div>
-          <p>Capture and store new detection data along with captured images.</p>
-          <div class="endpoint-details">
-            <strong>Body:</strong> <code>{ detections: [...], timestamp }</code><br>
-            <strong>Returns:</strong> <code>{ success: true, id }</code>
-          </div>
+          <p>The app uses the browser's OPFS to guarantee persistent, high-performance local storage.</p>
         </div>
 
         <div class="endpoint">
           <div class="endpoint-header">
-            <span class="method get">GET</span>
-            <span>/api/detections</span>
+            <span>SQLite-WASM</span>
           </div>
-          <p>Retrieve historical detection data and filtering parameters.</p>
-          <div class="endpoint-details">
-            <strong>Query:</strong> <code>?limit=number&class=string</code><br>
-            <strong>Returns:</strong> <code>Array of detection objects</code>
-          </div>
+          <p>Compiled to WebAssembly, SQLite runs entirely in the browser using the OPFS Virtual File System.</p>
         </div>
 
         <div class="endpoint">
           <div class="endpoint-header">
-            <span class="method get">GET</span>
-            <span>/api/stats</span>
+            <span>COOP / COEP Enabled</span>
           </div>
-          <p>Get high-level detection statistics and object counts.</p>
-          <div class="endpoint-details">
-            <strong>Returns:</strong> <code>{ totalEntries, classCounts... }</code>
-          </div>
-        </div>
-
-        <div class="endpoint">
-          <div class="endpoint-header">
-            <span class="method delete">DELETE</span>
-            <span>/api/detections</span>
-          </div>
-          <p>Wipe all stored detection history and captured images.</p>
-          <div class="endpoint-details">
-            <strong>Returns:</strong> <code>{ success: true }</code>
-          </div>
+          <p>Cross-Origin isolation ensures security and enables SharedArrayBuffer for high-speed file operations.</p>
         </div>
       </div>
     </div>
@@ -556,11 +531,11 @@
       <h2>Powered By</h2>
       <div class="tech-items">
         <div class="tech-item">TensorFlow.js</div>
-        <div class="tech-item">COCO-SSD Model</div>
+        <div class="tech-item">SQLite WASM</div>
+        <div class="tech-item">OPFS</div>
         <div class="tech-item">WebGPU</div>
         <div class="tech-item">WebGL</div>
-        <div class="tech-item">Next.js App Router</div>
-        <div class="tech-item">React</div>
+        <div class="tech-item">TensorFlow.js</div>
       </div>
     </div>
   </section>
@@ -580,33 +555,23 @@
           </ul>
         </div>
         <div class="advanced-item">
-          <h3>🎥 Smart Recording Engine</h3>
-          <p>Intelligent recording system that captures frames only when objects are detected, creating efficient highlight reels without wasting storage on empty footage.</p>
+          <h3>💾 Local-First Architecture</h3>
+          <p>By leveraging the Origin Private File System (OPFS), all data persistence happens entirely on the client, eliminating the need for complex backend databases.</p>
           <ul>
-            <li>Configurable confidence threshold slider</li>
-            <li>Pause/resume recording during capture</li>
-            <li>Real-time frame counter and timer</li>
-            <li>Export to MP4 or WebM formats</li>
+            <li>Persistent local SQLite database</li>
+            <li>No cloud storage fees or limits</li>
+            <li>Instant access to stored data</li>
+            <li>Works entirely offline</li>
           </ul>
         </div>
         <div class="advanced-item">
-          <h3>📡 Backend Integration</h3>
-          <p>RESTful API backend for storing detection data and images, enabling advanced analytics and historical tracking of detected objects.</p>
+          <h3>⚡ Secure Browser Environment</h3>
+          <p>The app enforces Cross-Origin Opener and Embedder policies (COOP/COEP) to create an isolated, secure environment required for high-performance memory operations.</p>
           <ul>
-            <li>Automatic image capture with detections</li>
-            <li>JSON-based detection history storage</li>
-            <li>Statistics and analytics endpoints</li>
-            <li>Bulk deletion and filtering capabilities</li>
-          </ul>
-        </div>
-        <div class="advanced-item">
-          <h3>🌐 Cloud Deployment Ready</h3>
-          <p>Designed for modern cloud platforms with serverless architecture support, making deployment to Vercel, Netlify, or similar platforms seamless.</p>
-          <ul>
-            <li>Vercel API functions for serverless backend</li>
-            <li>Automatic SSL and HTTPS support</li>
-            <li>Edge deployment for global performance</li>
-            <li>Environment variable configuration</li>
+            <li>SharedArrayBuffer enabled</li>
+            <li>Strict Cross-Origin Isolation</li>
+            <li>Secure, sandboxed data storage</li>
+            <li>Bypasses ephemeral storage issues</li>
           </ul>
         </div>
         <div class="advanced-item">

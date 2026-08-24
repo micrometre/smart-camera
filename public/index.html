@@ -281,11 +281,13 @@
   </main>
 
   <!-- TensorFlow.js core -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js" crossorigin="anonymous"></script>
   <!-- WebGPU backend — must be loaded AFTER tfjs core -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgpu/dist/tf-backend-webgpu.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgpu/dist/tf-backend-webgpu.min.js" crossorigin="anonymous"></script>
   <!-- COCO-SSD model -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd" crossorigin="anonymous"></script>
+  <!-- Database manager -->
+  <script src="/database.js"></script>
 
   <script>
     const video = document.getElementById('webcam');
@@ -306,6 +308,15 @@
     let lastBackendSend = 0;
     const BACKEND_SEND_INTERVAL = 2000; // Send to backend every 2 seconds
     let streaming = false;     // webcam stream is live
+    
+    // Initialize database
+    (async () => {
+      try {
+        await window.dbManager.initialize();
+      } catch (err) {
+        console.error('Failed to initialize database:', err);
+      }
+    })();
 
     // ── Confidence slider ────────────────────────────────────────────
     thresholdSlider.addEventListener('input', () => {
@@ -324,28 +335,14 @@
           tempCanvas.height = video.videoHeight || 480;
           const tempCtx = tempCanvas.getContext('2d');
           tempCtx.drawImage(video, 0, 0);
-          imageData = tempCanvas.toDataURL('image/png', 0.8);
+          imageData = tempCanvas.toDataURL('image/jpeg', 0.8);
         }
 
-        const response = await fetch(`${BACKEND_URL}/api/detections`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            detections: detections,
-            timestamp: new Date().toISOString(),
-            image: imageData
-          })
-        });
-        
-        if (!response.ok) {
-          console.error('Failed to send detections to backend');
-        } else {
-          console.log('✅ Detections sent to backend successfully');
-        }
+        const timestamp = new Date().toISOString();
+        await window.dbManager.saveDetection(timestamp, detections, imageData);
+        console.log('✅ Detections saved to local OPFS database successfully');
       } catch (error) {
-        console.error('Error sending detections to backend:', error);
+        console.error('Error saving detections to local database:', error);
       }
     }
 

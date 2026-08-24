@@ -301,6 +301,7 @@
         <strong id="totalCount">0</strong> captures found
       </div>
       <div class="toolbar-actions">
+        <button id="exportDbBtn" class="btn btn-primary" style="background: #00b478;">Export DB</button>
         <button id="selectAllBtn" class="btn btn-primary">Select All</button>
         <button id="deleteSelectedBtn" class="btn btn-danger" disabled>
           Delete Selected (<span id="selectedCount">0</span>)
@@ -326,11 +327,13 @@
     </div>
   </main>
 
+  <script src="/database.js"></script>
   <script>
     const gallery = document.getElementById('gallery');
     const emptyState = document.getElementById('emptyState');
     const totalCountEl = document.getElementById('totalCount');
     const selectedCountEl = document.getElementById('selectedCount');
+    const exportDbBtn = document.getElementById('exportDbBtn');
     const selectAllBtn = document.getElementById('selectAllBtn');
     const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
     const pagination = document.getElementById('pagination');
@@ -343,16 +346,14 @@
     let selectedIds = new Set();
     let currentPage = 1;
     const itemsPerPage = 100;
-    const API_URL = '/api/detections';
 
     async function fetchDetections() {
       try {
-        const response = await fetch(API_URL);
-        detections = await response.json();
+        detections = await window.dbManager.getDetections(1000);
         currentPage = 1;
         renderGallery();
       } catch (err) {
-        console.error('Failed to fetch detections', err);
+        console.error('Failed to fetch detections from local database', err);
       }
     }
 
@@ -498,28 +499,47 @@
 
     async function deleteIds(ids) {
       try {
-        const response = await fetch('/api/detections/bulk-delete', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ids })
-        });
+        await window.dbManager.deleteDetections(ids);
         
-        if (response.ok) {
-          // Remove from local state
-          ids.forEach(id => selectedIds.delete(id));
-          detections = detections.filter(d => !ids.includes(d.id));
-          renderGallery();
-        } else {
-          alert('Failed to delete detections');
-        }
+        // Remove from local state
+        ids.forEach(id => selectedIds.delete(id));
+        detections = detections.filter(d => !ids.includes(d.id));
+        renderGallery();
       } catch (err) {
         console.error(err);
         alert('Error occurred while deleting');
       }
     }
 
+    // Export DB functionality
+    exportDbBtn.addEventListener('click', async () => {
+      try {
+        const root = await navigator.storage.getDirectory();
+        const fileHandle = await root.getFileHandle('smart_camera.sqlite3', { create: false });
+        const file = await fileHandle.getFile();
+        const url = URL.createObjectURL(file);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'smart_camera.sqlite3';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error('Failed to export DB:', err);
+        alert('Could not export database. It may not exist yet.');
+      }
+    });
+
     // Init
-    fetchDetections();
+    (async () => {
+      try {
+        await window.dbManager.initialize();
+        await fetchDetections();
+      } catch (err) {
+        console.error('Failed to initialize database:', err);
+      }
+    })();
   </script>
   <script src="/navigation.js"></script>
 </body>
